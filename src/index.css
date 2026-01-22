@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+body{
+    background-image: url(assets/images/bgimage.avif);
+    background-size: cover;
+    background-repeat: no-repeat;  
+    background-attachment: fixed; 
+}
