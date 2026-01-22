@@ -1,25 +1,27 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { registeraction } from '../../services/auth';
+import { toast } from "react-toastify";
+import bg from "../../assets/images/bgimage.avif";
+
 
 const Signup = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  //const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm();
 
   const password = watch("password");
-
-  const onSubmit = async (data) => {
-    console.log("Signup Data:", data);
-  };
-
+  const API_BASE = import.meta.env.VITE_API_BASE_URL;
+  
 
 
   const handleGoogleLogin = () => {
@@ -31,11 +33,36 @@ const Signup = () => {
   };
 
 
+  const onSubmit = async (data) => {
+    console.log("FORM DATA:", data);
+    const payload = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      userName: data.userName,
+      email: data.email,
+      profession: data.profession,
+      password: data.password,
+      role: "USER",
+    };
+
+    const res = await registeraction(payload);
+    if (!res) return;
+    reset();
+    toast.info('Please check your email to verify your account before logging in');
+    //navigate('/login', { replace: true });
+  };
+
+
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-2xl rounded-2xl border backdrop-blur-xl p-8 shadow-xl">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat" 
+    style={{
+        backgroundImage: `url(${bg}`,
+      }}>
+    
+      <div className="w-full max-w-2xl rounded-2xl border border-purple-400 backdrop-blur-xl p-8 shadow-xl">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-black">
+          <h1 className="text-2xl font-semibold text-white">
             Signup to Coding Platform
           </h1>
         </div>
@@ -47,41 +74,16 @@ const Signup = () => {
               className="border border-purple-300 rounded-lg px-3 py-1"
             >
               <legend className="px-1 text-sm text-purple-300">
-                Username *
-              </legend>
-
-              <input
-                {...register("username", {
-                  required: "Username is required",
-                  minLength: { value: 3, message: "Minimum 3 characters" },
-                })}
-                placeholder="Enter your Username"
-                className="w-full bg-transparent px-1 py-1 text-gray-700 placeholder-purple-300 focus:outline-none"
-              />
-            </fieldset>
-
-            {errors.username && (
-              <p className="absolute left-2 -bottom-4 text-xs text-red-400 pointer-events-none">
-                {errors.username.message}
-              </p>
-            )}
-          </div>
-
-          <div className="relative mb-6">
-            <fieldset
-              className="border border-purple-300 rounded-lg px-3 py-1"
-            >
-              <legend className="px-1 text-sm text-purple-300">
                 Firstname *
               </legend>
 
               <input
                 {...register("firstName", {
-                  required: "Firstname is required",
+                  // required: "Firstname is required",
                   minLength: { value: 3, message: "Minimum 3 characters" },
                 })}
                 placeholder="Enter your Firstname"
-                className="w-full bg-transparent px-1 py-1 text-gray-700 placeholder-purple-300 focus:outline-none"
+                className="w-full bg-transparent px-1 py-1 text-white placeholder-purple-300 focus:outline-none"
               />
             </fieldset>
 
@@ -92,6 +94,32 @@ const Signup = () => {
             )}
           </div>
 
+
+          <div className="relative mb-6">
+            <fieldset
+              className="border border-purple-300 rounded-lg px-3 py-1"
+            >
+              <legend className="px-1 text-sm text-purple-300">
+                Lastname *
+              </legend>
+
+              <input
+                {...register("lastName", {
+                  // required: "Username is required",
+                  minLength: { value: 3, message: "Minimum 3 characters" },
+                })}
+                placeholder="Enter your Lastname"
+                className="w-full bg-transparent px-1 py-1 text-white placeholder-purple-300 focus:outline-none"
+              />
+            </fieldset>
+
+            {errors.lastName && (
+              <p className="absolute left-2 -bottom-4 text-xs text-red-400 pointer-events-none">
+                {errors.lastName.message}
+              </p>
+            )}
+          </div>
+
           <div className="relative mb-6">
             <fieldset
               className="border border-purple-300 rounded-lg px-3 py-1"
@@ -101,18 +129,18 @@ const Signup = () => {
               </legend>
 
               <input
-                {...register("lastName", {
-                  // required: "Username is required",
+                {...register("userName", {
+                  required: "Username is required",
                   minLength: { value: 3, message: "Minimum 3 characters" },
                 })}
                 placeholder="Enter your Username"
-                className="w-full bg-transparent px-1 py-1 text-gray-700 placeholder-purple-300 focus:outline-none"
+                className="w-full bg-transparent px-1 py-1 text-white placeholder-purple-300 focus:outline-none"
               />
             </fieldset>
 
-            {errors.lastName && (
+            {errors.userName && (
               <p className="absolute left-2 -bottom-4 text-xs text-red-400 pointer-events-none">
-                {errors.lastname.message}
+                {errors.userName.message}
               </p>
             )}
           </div>
@@ -134,13 +162,38 @@ const Signup = () => {
                   },
                 })}
                 placeholder="Enter your Email Address"
-                className="w-full bg-transparent px-1 py-1 text-gray-700 placeholder-purple-300 focus:outline-none"
+                className="w-full bg-transparent px-1 py-1 text-white placeholder-purple-300 focus:outline-none"
               />
             </fieldset>
 
             {errors.email && (
               <p className="absolute left-2 -bottom-4 text-xs text-red-400 pointer-events-none">
                 {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          <div className="relative mb-6">
+            <fieldset
+              className="border border-purple-300 rounded-lg px-3 py-1"
+            >
+              <legend className="px-1 text-sm text-purple-300">
+                Profession *
+              </legend>
+
+              <input
+                {...register("profession", {
+                  required: "profession is required",
+                  minLength: { value: 3, message: "Minimum 3 characters" },
+                })}
+                placeholder="Enter your profession(developer/test eng..)"
+                className="w-full bg-transparent px-1 py-1 text-white placeholder-purple-300 focus:outline-none"
+              />
+            </fieldset>
+
+            {errors.profession && (
+              <p className="absolute left-2 -bottom-4 text-xs text-red-400 pointer-events-none">
+                {errors.profession.message}
               </p>
             )}
           </div>
@@ -169,7 +222,7 @@ const Signup = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 text-purple-300 hover:text-black"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 text-white hover:text-black"
                 >
                   {showPassword ? "🙈" : "👁️"}
                 </button>
@@ -182,8 +235,6 @@ const Signup = () => {
               </p>
             )}
           </div>
-
-          
 
         
           <button
@@ -200,7 +251,7 @@ const Signup = () => {
               <hr className="flex-1 border-gray-700" />
             </div>
             <button
-              className="w-full flex items-center justify-center gap-3 border border-gray-600 bg-gray-900 hover:bg-gray-700 text-white py-2 rounded-lg transition"
+              className="w-full flex items-center cursor-pointer justify-center gap-3 border border-gray-600  hover:bg-purple-400 text-white py-2 rounded-lg transition"
               onClick={handleGoogleLogin}
               type="button"
             >
@@ -216,14 +267,14 @@ const Signup = () => {
             <button
               onClick={handleGithubLogin}
               type="button"
-              className="w-full flex items-center justify-center gap-3 border border-gray-600 bg-gray-900 hover:bg-gray-700 text-white py-2 rounded-lg transition"
+              className="w-full flex cursor-pointer items-center justify-center gap-3 border border-gray-600  hover:bg-purple-400 text-white py-2 rounded-lg transition"
             >
               <img
                 src="https://www.svgrepo.com/show/512317/github-142.svg"
                 alt="github"
                 className="w-5 h-5"
               />
-              Continue with guthub
+              Continue with github
             </button>
           </div>
         </form>
