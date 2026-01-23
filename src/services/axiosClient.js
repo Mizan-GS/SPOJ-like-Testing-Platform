@@ -1,27 +1,44 @@
-import axios from "axios"
+import axios from "axios";
+import { triggerLogout } from "./authEvents";
 
-const axiosClient=axios.create({
-     baseURL : "https://xc4fn4b4-8080.inc1.devtunnels.ms",
-     headers:{
-          "Content-Type" :"application/json"
-     },
+const axiosClient = axios.create({
+  baseURL: "https://ln6fwfvn-8080.inc1.devtunnels.ms/",
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-//*attach token automatically to every request
-
+/* ------------------------------------
+   REQUEST INTERCEPTOR
+------------------------------------ */
 axiosClient.interceptors.request.use(
-     (config)=>{
-          const token = localStorage.getItem("token")
+  (config) => {
+    const token = localStorage.getItem("token");
 
-          if (token){
-               config.headers.Authorization = `Bearer ${token}`
-          }
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-          return config;
-     },
-     (error)=>{
-          return Promise.reject(error)
-     }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+/* ------------------------------------
+   RESPONSE INTERCEPTOR
+------------------------------------ */
+axiosClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+
+    // 🔐 Token invalid / expired
+    if (status === 401) {
+      triggerLogout();
+    }
+
+    return Promise.reject(error);
+  }
 );
 
 export default axiosClient;

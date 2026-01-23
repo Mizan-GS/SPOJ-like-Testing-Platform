@@ -3,53 +3,64 @@ import AdminLayout from "../../features/admin/layout/AdminLayout";
 import AdminDashboard from "../../features/admin/dashboard/AdminDashboard";
 import QuestionsList from "../../features/admin/questions/QuestionsList";
 import TestList from "../../features/admin/tests/TestList";
-import Analytics from "../../features/admin/analytics/Analytics";
+import Analytics from "../../features/admin/Assessments/Assessments";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 import Unauthorized from "../../pages/Unauthorized";
 import NotFound from "../../pages/NotFound";
 import Login from "../../pages/Login";
-
+import ForgotPassword from "../../pages/ForgotPassword";
+import { AuthProvider } from "../../context/AuthContext";
+import Assessments from "../../features/admin/Assessments/Assessments";
 
 
 
 const router = createBrowserRouter([
-     {
-          path:"/",
-          element:<Login/>
-     },
-     {
-          path:'/admin',
-          element:(
-               <RoleProtectedRoute allowedRoles={['admin']}>
-                    <AdminLayout/>
-               </RoleProtectedRoute>
-          ),
-          children:[
+{
+     element: <AuthProvider/>,
+     children: [
                {
-                    index:true,
-                    element:<AdminDashboard/>
+                    path:"/",
+                    element:<Login/>
                },
                {
-                    path:"questions",
-                    element:<QuestionsList/>
+                    path:"/forgot-password",
+                    element:<ForgotPassword/>
                },
                {
-                    path:"tests",
-                    element:<TestList/>
+                    path:'/admin',
+                    element:(
+                         <RoleProtectedRoute allowedRoles={['admin']}>
+                              <AdminLayout/>
+                         </RoleProtectedRoute>
+                    ),
+                    children:[
+                         {
+                              index:true,
+                              element:<AdminDashboard/>
+                         },
+                         {
+                              path:"questions",
+                              element:<QuestionsList/>
+                         },
+                         {
+                              path:"tests",
+                              element:<TestList/>
+                         },
+                         {
+                              path:"assessments",
+                              element:<Assessments/>
+                         },
+                    ],
                },
                {
-                    path:"analytics",
-                    element:<Analytics/>
+                    path:"/unauthorized",
+                    element:<Unauthorized/>
+               },
+               {
+                    path:"*",
+                    element:<NotFound/>
                },
           ],
-     },
-     {
-          path:"/unauthorized",
-          element:<Unauthorized/>
-     },
-     {
-          path:"*",
-          element:<NotFound/>
      },
 ]);
 

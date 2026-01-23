@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
-
+import { useAuth } from "../context/AuthContext";
 import { loginaction } from "../services/auth.api";
 import bg from "../../assets/images/photo_2026-01-22_13-42-38.jpg";
 
@@ -10,7 +10,8 @@ const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [searchParams] = useSearchParams();
-
+  const {login}=useAuth();
+  const [rememberMe,setRememberMe] = useState(false);
   const {
     register,
     handleSubmit,
@@ -30,6 +31,21 @@ const Login = () => {
       toast.error("Email verification failed or expired.");
     }
   }, [searchParams]);
+
+  useEffect(()=>{
+    const remembered = localStorage.getItem("rememberMe")==="true";
+
+    if (remembered) {
+      const email = localStorage.getItem("rememberEmail") || "";
+      const password = localStorage.getItem("rememberPassword")||"";
+
+      reset({
+        email,
+        password,
+      });
+      setRememberMe(true)
+    }
+  },[reset])
 
   /* ------------------------------------
      LOGIN SUBMIT HANDLER
@@ -53,7 +69,21 @@ const Login = () => {
 
     const user = res.data.data;
 
-    // 🔒 Backend-ready auth state
+    if (rememberMe) {
+      localStorage.setItem("rememberMe", "true");
+      localStorage.setItem("rememberEmail", data.email);
+      localStorage.setItem("rememberPassword", data.password);
+    } else {
+      localStorage.removeItem("rememberMe");
+      localStorage.removeItem("rememberEmail");
+      localStorage.removeItem("rememberPassword");
+    }
+
+    login({
+      token : user.token,
+      role : user.role,
+    });
+e
     localStorage.setItem("token", user.token);
     localStorage.setItem("role", user.role.toLowerCase());
     localStorage.setItem("userId", user.id);
@@ -164,6 +194,22 @@ const Login = () => {
               Forgot password?
             </span>
           </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 accent-purple-500"
+            />
+            <label
+              htmlFor="rememberMe"
+              className="text-sm text-purple-300 cursor-pointer"
+            >
+              Remember me
+            </label>
+          </div>
+
 
           {/* SUBMIT */}
           <button
@@ -209,7 +255,7 @@ const Login = () => {
           </div> */}
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        {/* <p className="mt-6 text-center text-sm text-gray-500">
           Don’t have an account?{" "}
           <span
             className="cursor-pointer underline"
@@ -217,7 +263,7 @@ const Login = () => {
           >
             Signup
           </span>
-        </p>
+        </p> */}
       </div>
     </div>
   );

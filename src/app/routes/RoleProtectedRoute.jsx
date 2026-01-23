@@ -1,15 +1,22 @@
 import { Navigate } from "react-router-dom"
+import { useAuth } from "../../context/AuthContext";
 
 
 
 function RoleProtectedRoute({allowedRoles,children}) {
 
-     const token = localStorage.getItem("token")
-     const role = localStorage.getItem('role')
+     // const token = localStorage.getItem("token")
+     // const role = localStorage.getItem('role')
+
+     const {isAuthenticated,role,isInitializing}= useAuth()
+
+     if (isInitializing) {
+     return null;
+     }
 
      //!not logged in
-     if (!token) {
-          return <Navigate to='/login' replace/>
+     if (!isAuthenticated) {
+          return <Navigate to='/' replace/>
      } 
 
      //!logged in but role not allowed
