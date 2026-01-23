@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { loginaction } from "../../services/auth";
 import { toast } from "react-toastify";
 
 import bg from "../../assets/images/bgimage.avif";
+import { getToken, isTokenExpired } from "../../utils/jwtUtil";
 
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [searchParams] = useSearchParams();
+  const redirectedRef = useRef(false);
 
   const {
     register,
@@ -17,6 +19,17 @@ const Login = () => {
     formState: { errors, isSubmitting },
     reset,
   } = useForm();
+
+  useEffect(() => {
+    if (redirectedRef.current) return;
+    const token = getToken();
+    if (token && !isTokenExpired()) {
+      redirectedRef.current = true;
+      if (window.location.pathname !== "/dashboard") {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [navigate]);
 
   const isVerified = searchParams.get("verified");
   const canShowLoginForm = isVerified === "true";
@@ -47,6 +60,7 @@ const Login = () => {
   const handleGithubLogin = () => {
     window.location.href = `${API_BASE}/auth/github`;
   };
+  
 
   const onSubmit = async (data) => {
     const res = await loginaction(data.email, data.password);
@@ -62,12 +76,12 @@ const Login = () => {
     console.log("TOKEN:", token);
 
     if (token) {
-      localStorage.setItem("token", token);
+      sessionStorage.setItem("token", token);
     }
 
     if (user) {
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      localStorage.setItem("role", user.role || "");
+      sessionStorage.setItem("currentUser", JSON.stringify(user));
+      sessionStorage.setItem("role", user.role || "");
     }
     if (user?.role === "USER") {
       navigate("/dashboard", { replace: true });
@@ -158,7 +172,8 @@ const Login = () => {
           >
             {isSubmitting ? "Logging in..." : "Login"}
           </button>
-
+             
+             {/*
           <div className="space-y-3 mb-5">
             <div className="flex items-center gap-3 my-4">
               <hr className="flex-1 border-gray-700" />
@@ -192,12 +207,13 @@ const Login = () => {
               Continue with Github
             </button>
           </div>
+          */}
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Don’t have an account?{" "}
           <span
-            className="cursor-pointer underline"
+            className="cursor-pointer underline text-purple-500"
             onClick={() => navigate("/")}
           >
             Signup

@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 const Navbar = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
-
+  const [open, setOpen] = useState(false);
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -60,44 +60,68 @@ const Navbar = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="w-full bg-white border-b py-3 px-6 flex items-center justify-between">
-        <div className="text-xl font-semibold">Coding Platform</div>
+   <nav className="bg-purple-500 text-white h-20 px-6 py-4 flex justify-around items-center shadow">
+      <div
+        className="text-xl font-bold cursor-pointer"
+        onClick={() => navigate("/")}
+      >
+        Coding Plateform
+      </div>
 
-        <div className="flex items-center gap-4">
-          {user ? (
-            <div className="flex items-center gap-4">
+      <ul className="flex gap-6 items-center">
+        <li className="hover:text-purple-200 cursor-pointer">Dashboard</li>
+        <li className="hover:text-purple-200 cursor-pointer">My Results</li>
+
+        <li
+          className="relative"
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
+        >
+          <span className="hover:text-purple-200 cursor-pointer">
+            Profile
+          </span>
+
+        
+          {open && (
+            <div className="absolute right-0 top-full mt-3 w-60 bg-white text-gray-800 rounded-xl shadow-lg border z-50">
+              <div className="px-4 py-3 border-b">
+                <p className="font-semibold text-purple-700">
+                  Puja Shaw
+                </p>
+                <p className="text-sm text-gray-500">
+                  puja@email.com
+                </p>
+              </div>
+
               <button
-                onClick={() => navigate('/profile')}
-                title="View profile"
-                className="w-10 h-10 rounded-full cursor-pointer overflow-hidden border-2 border-purple-300 p-0"
+                onClick={() => navigate("/profile")}
+                className="w-full text-left px-4 py-2 hover:bg-purple-50"
               >
-                <img
-                  src={user.profile?.avatar?.url || "https://www.gravatar.com/avatar?d=mp&s=40"}
-                  alt="avatar"
-                  className="w-full h-full object-cover"
-                />
+                👤 View Profile
               </button>
 
               <button
-                onClick={handleLogout}
-                className="px-3 py-2 bg-red-600 text-white cursor-pointer rounded-full text-sm"
+                onClick={() => navigate("/profile/edit")}
+                className="w-full text-left px-4 py-2 hover:bg-purple-50"
               >
-                Logout
+                ✏️ Edit Profile
               </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <button onClick={() => navigate('/login')} className="px-3 py-2 text-sm">Login</button>
-              <button onClick={() => navigate('/')} className="px-3 py-2 bg-purple-600 text-white rounded-md text-sm">Signup</button>
+
+              <button
+                onClick={() => {
+                  localStorage.clear();
+                  navigate("/login");
+                }}
+                className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+              >
+                🚪 Logout
+              </button>
             </div>
           )}
-        </div>
-      </nav>
-
-      
-    </div>
+        </li>
+      </ul>
+    </nav>
   );
-}
+};
 
 export default Navbar

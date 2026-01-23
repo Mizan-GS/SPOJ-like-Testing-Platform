@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { registeraction } from '../../services/auth';
+import { registeraction } from "../../services/auth";
 import { toast } from "react-toastify";
 import bg from "../../assets/images/bgimage.avif";
-
+import { getToken, isTokenExpired } from "../../utils/jwtUtil";
 
 const Signup = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   //const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const redirectedRef = useRef(false);
 
   const {
     register,
@@ -21,8 +22,17 @@ const Signup = () => {
 
   const password = watch("password");
   const API_BASE = import.meta.env.VITE_API_BASE_URL;
-  
 
+  useEffect(() => {
+    if (redirectedRef.current) return;
+    const token = getToken();
+    if (token && !isTokenExpired()) {
+      redirectedRef.current = true;
+      if (window.location.pathname !== "/dashboard") {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [navigate]);
 
   const handleGoogleLogin = () => {
     window.location.href = `${API_BASE}/auth/google`;
@@ -31,7 +41,6 @@ const Signup = () => {
   const handleGithubLogin = () => {
     window.location.href = `${API_BASE}/auth/github`;
   };
-
 
   const onSubmit = async (data) => {
     console.log("FORM DATA:", data);
@@ -48,18 +57,19 @@ const Signup = () => {
     const res = await registeraction(payload);
     if (!res) return;
     reset();
-    toast.info('Please check your email to verify your account before logging in');
+    toast.info(
+      "Please check your email to verify your account before logging in",
+    );
     //navigate('/login', { replace: true });
   };
 
-
-
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat" 
-    style={{
-        backgroundImage: `url(${bg}`,
-      }}>
-    
+    <div
+      className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `url(${bg})`,
+      }}
+    >
       <div className="w-full max-w-2xl rounded-2xl border border-purple-400 backdrop-blur-xl p-8 shadow-xl">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold text-white">
@@ -68,13 +78,10 @@ const Signup = () => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-
           <div className="relative mb-6">
-            <fieldset
-              className="border border-purple-300 rounded-lg px-3 py-1"
-            >
+            <fieldset className="border border-purple-300 rounded-lg px-3 py-1">
               <legend className="px-1 text-sm text-purple-300">
-                Firstname *
+                Firstname
               </legend>
 
               <input
@@ -94,13 +101,10 @@ const Signup = () => {
             )}
           </div>
 
-
           <div className="relative mb-6">
-            <fieldset
-              className="border border-purple-300 rounded-lg px-3 py-1"
-            >
+            <fieldset className="border border-purple-300 rounded-lg px-3 py-1">
               <legend className="px-1 text-sm text-purple-300">
-                Lastname *
+                Lastname
               </legend>
 
               <input
@@ -121,9 +125,7 @@ const Signup = () => {
           </div>
 
           <div className="relative mb-6">
-            <fieldset
-              className="border border-purple-300 rounded-lg px-3 py-1"
-            >
+            <fieldset className="border border-purple-300 rounded-lg px-3 py-1">
               <legend className="px-1 text-sm text-purple-300">
                 Username *
               </legend>
@@ -146,12 +148,8 @@ const Signup = () => {
           </div>
 
           <div className="relative mb-6">
-            <fieldset
-              className="border border-purple-300 rounded-lg px-3 py-1"
-            >
-              <legend className="px-1 text-sm text-purple-300">
-                Email *
-              </legend>
+            <fieldset className="border border-purple-300 rounded-lg px-3 py-1">
+              <legend className="px-1 text-sm text-purple-300">Email *</legend>
 
               <input
                 {...register("email", {
@@ -174,9 +172,7 @@ const Signup = () => {
           </div>
 
           <div className="relative mb-6">
-            <fieldset
-              className="border border-purple-300 rounded-lg px-3 py-1"
-            >
+            <fieldset className="border border-purple-300 rounded-lg px-3 py-1">
               <legend className="px-1 text-sm text-purple-300">
                 Profession *
               </legend>
@@ -199,8 +195,7 @@ const Signup = () => {
           </div>
 
           <div className="relative mb-6">
-            <fieldset
-              className="border rounded-lg px-3 py-1 border-purple-300">
+            <fieldset className="border rounded-lg px-3 py-1 border-purple-300">
               <legend className="px-1 text-sm text-purple-300">
                 Password *
               </legend>
@@ -216,7 +211,7 @@ const Signup = () => {
                     },
                   })}
                   placeholder="Enter your Password"
-                  className="w-full bg-transparent px-1 py-1 text-gray-700 placeholder-purple-300 focus:outline-none pr-10"
+                  className="w-full bg-transparent px-1 py-1 text-white placeholder-purple-300 focus:outline-none pr-10"
                 />
 
                 <button
@@ -236,14 +231,14 @@ const Signup = () => {
             )}
           </div>
 
-        
           <button
             disabled={isSubmitting}
-            className="w-full rounded-lg cursor-pointer bg-linear-to-r from-purple-500 to-fuchsia-500 py-3 font-semibold text-white hover:opacity-90 disabled:opacity-50"
+            className="w-full rounded-lg cursor-pointer bg-linear-to-r  from-purple-500 text-2xl to-fuchsia-500  py-4 font-semibold text-white hover:opacity-90 disabled:opacity-50"
           >
             {isSubmitting ? "Creating Account..." : "Signup"}
           </button>
-
+            
+            {/*
           <div className="space-y-3 mb-5">
             <div className="flex items-center gap-3 my-4">
               <hr className="flex-1 border-gray-700" />
@@ -277,12 +272,13 @@ const Signup = () => {
               Continue with github
             </button>
           </div>
+          */}
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Already have an account?{" "}
           <span
-            className="cursor-pointer underline"
+            className="cursor-pointer underline text-purple-500"
             onClick={() => navigate("/login")}
           >
             Login
