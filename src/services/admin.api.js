@@ -7,8 +7,9 @@ import axiosClient from "./axiosClient";
 export const createQuestion = (data) =>
   axiosClient.post("/questions/admin", data);
 
-export const getAllQuestions = () =>
-  axiosClient.get("/questions");
+export const getAllQuestions = (params = {}) =>
+  axiosClient.get("/questions", { params });
+
 
 export const getQuestionById = (id) =>
   axiosClient.get(`/questions/${id}`);
@@ -21,6 +22,9 @@ export const deleteQuestion = (id) =>
 
 export const restoreQuestion = (id) =>
   axiosClient.patch(`/questions/admin/${id}/restore`);
+
+export const getDeletedQuestions = (params = {})=>
+  axiosClient.get("/questions/admin/deleted", {params});
 
 //*   TESTS (ADMIN)
 

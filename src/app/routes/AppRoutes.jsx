@@ -11,7 +11,8 @@ import Login from "../../pages/Login";
 import ForgotPassword from "../../pages/ForgotPassword";
 import { AuthProvider } from "../../context/AuthContext";
 import Assessments from "../../features/admin/Assessments/Assessments";
-
+import CreateQuestion from "../../features/admin/questions/CreateQuestion";
+import DeletedQuestionsList from "../../features/admin/questions/DeletedQuestionsList";
 
 
 const router = createBrowserRouter([
@@ -49,6 +50,14 @@ const router = createBrowserRouter([
                          {
                               path:"assessments",
                               element:<Assessments/>
+                         },
+                         {
+                              path:"questions/create",
+                              element:<CreateQuestion/>
+                         },
+                         {
+                              path:"questions/deleted",
+                              element:<DeletedQuestionsList/>
                          },
                     ],
                },
