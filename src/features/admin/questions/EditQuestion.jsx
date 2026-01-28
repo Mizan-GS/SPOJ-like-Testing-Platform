@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import TestCasesSection from "./TestCasesSection";
 
 import {
   getQuestionById,
@@ -41,9 +42,10 @@ function EditQuestionModal({
           correctAnswerIndex: q.options
             ? q.options.indexOf(q.correctAnswer)
             : null,
-          testCases: q.testCases
-            ? JSON.stringify(q.testCases, null, 2)
-            : "",
+          testCases: q.testCases?.length
+          ? q.testCases
+          : [{ input: "", output: "", explanation: "" }],
+
         });
       } catch {
         toast.error("Failed to load question");
@@ -67,6 +69,13 @@ function EditQuestionModal({
     setForm((p) => ({ ...p, options: opts }));
   };
 
+  const handleTestCaseChange = (index, field, value) => {
+    const updated = [...form.testCases];
+    updated[index][field] = value;
+    setForm((prev) => ({ ...prev, testCases: updated }));
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -87,14 +96,14 @@ function EditQuestionModal({
 
     if (isCoding) {
       payload.constraints = form.constraints;
-      try {
-        payload.testCases = form.testCases
-          ? JSON.parse(form.testCases)
-          : [];
-      } catch {
-        toast.error("Invalid test case JSON");
-        return;
-      }
+     payload.testCases = form.testCases
+      .filter(tc => tc.input && tc.output)
+      .map(tc => ({
+        input: tc.input,
+        output: tc.output,
+        explanation: tc.explanation || "",
+      }));
+
     }
 
     if (isMCQ) {
@@ -176,41 +185,32 @@ function EditQuestionModal({
             }`}
             />
           {isCoding && (
-            <div className="space-y-6">
-                <div>
-                <label className="text-sm font-medium text-gray-700">
-                    Constraints
-                </label>
-                <textarea
-                    name="constraints"
-                    value={form.constraints}
-                    disabled={isViewMode}
-                    onChange={handleChange}
-                    rows={3}
-                    className="mt-1 w-full rounded-lg border px-4 py-2"
-                />
-                </div>
-
-                <div>
-                <label className="text-sm font-medium text-gray-700">
-                    Test Cases (JSON)
-                </label>
-                <textarea
-                    name="testCases"
-                    value={form.testCases}
-                    disabled={isViewMode}
-                    onChange={(e) =>
-                    setForm((prev) => ({
-                        ...prev,
-                        testCases: e.target.value,
-                    }))
-                    }
-                    rows={6}
-                    className="mt-1 w-full rounded-lg border px-4 py-2 font-mono text-sm"
-                />
-                </div>
+          <div className="space-y-6">
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Constraints
+              </label>
+              <textarea
+                name="constraints"
+                value={form.constraints}
+                disabled={isViewMode}
+                onChange={handleChange}
+                rows={3}
+                className={`mt-1 w-full rounded-lg border px-4 py-2 ${
+                  isViewMode ? "bg-gray-100 cursor-not-allowed" : ""
+                }`}
+              />
             </div>
-            )}
+
+            <TestCasesSection
+              testCases={form.testCases}
+              onChange={isViewMode ? undefined : handleTestCaseChange}
+              readOnly={isViewMode}
+              allowAdd={false}
+            />
+          </div>
+        )}
+
 
             {isMCQ && (
                 <div className="space-y-4">

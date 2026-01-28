@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
+import TestCasesSection from "./TestCasesSection";
 import { createQuestion } from "../../../services/admin.api";
 
 const CATEGORY_OPTIONS = [
@@ -26,8 +26,11 @@ function CreateQuestion() {
     constraints: "",
     options: ["", "", "", ""],
     correctAnswer: null,
-    testCases: "",
+    testCases: [
+      { input: "", output: "", explanation: "" },
+    ],
   });
+
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -44,6 +47,30 @@ function CreateQuestion() {
     updated[index] = value;
     setForm((prev) => ({ ...prev, options: updated }));
   };
+
+  const handleTestCaseChange = (index, field, value) => {
+    const updated = [...form.testCases];
+    updated[index][field] = value;
+    setForm((prev) => ({ ...prev, testCases: updated }));
+  };
+
+  const addTestCase = () => {
+    setForm((prev) => ({
+      ...prev,
+      testCases: [
+        ...prev.testCases,
+        { input: "", output: "", explanation: "" },
+      ],
+    }));
+  };
+
+  const removeTestCase = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      testCases: prev.testCases.filter((_, i) => i !== index),
+    }));
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,14 +91,14 @@ function CreateQuestion() {
     if (isCoding) {
       payload.constraints = form.constraints;
 
-      try {
-        payload.testCases = form.testCases
-          ? JSON.parse(form.testCases)
-          : [];
-      } catch {
-        toast.error("Invalid JSON format in test cases");
-        return;
-      }
+      payload.testCases = form.testCases
+      .filter(tc => tc.input && tc.output)
+      .map(tc => ({
+        input: tc.input,
+        output: tc.output,
+        explanation: tc.explanation || "",
+      }));
+
     }
 
 
@@ -210,35 +237,29 @@ function CreateQuestion() {
 
         {/* -------- CODING FIELDS -------- */}
         {isCoding && (
-          <div className="space-y-6">
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Constraints
-              </label>
-              <textarea
-                name="constraints"
-                value={form.constraints}
-                onChange={handleChange}
-                rows={3}
-                className="mt-1 w-full rounded-lg border px-4 py-2"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Test Cases (JSON)
-              </label>
-              <textarea
-                name="testCases"
-                value={form.testCases}
-                onChange={handleChange}
-                rows={5}
-                placeholder='[ { "input": "...", "output": "..." } ]'
-                className="mt-1 w-full rounded-lg border px-4 py-2 font-mono text-sm"
-              />
-            </div>
+        <div className="space-y-6">
+          <div>
+            <label className="text-sm font-medium text-gray-700">
+              Constraints
+            </label>
+            <textarea
+              name="constraints"
+              value={form.constraints}
+              onChange={handleChange}
+              rows={3}
+              className="mt-1 w-full rounded-lg border px-4 py-2"
+            />
           </div>
-        )}
+
+          <TestCasesSection
+            testCases={form.testCases}
+            onChange={handleTestCaseChange}
+            onAdd={addTestCase}
+            onRemove={removeTestCase}
+          />
+        </div>
+      )}
+
 
         {/* -------- MCQ FIELDS -------- */}
         {isMCQ && (

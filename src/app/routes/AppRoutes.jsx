@@ -13,6 +13,7 @@ import { AuthProvider } from "../../context/AuthContext";
 import Assessments from "../../features/admin/Assessments/Assessments";
 import CreateQuestion from "../../features/admin/questions/CreateQuestion";
 import DeletedQuestionsList from "../../features/admin/questions/DeletedQuestionsList";
+import DeletedTests from "../../features/admin/tests/DeletedTests";
 
 
 const router = createBrowserRouter([
@@ -58,6 +59,10 @@ const router = createBrowserRouter([
                          {
                               path:"questions/deleted",
                               element:<DeletedQuestionsList/>
+                         },
+                         {
+                              path:"tests/deleted",
+                              element:<DeletedTests/>
                          },
                     ],
                },

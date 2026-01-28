@@ -32,8 +32,8 @@ export const getDeletedQuestions = (params = {})=>
 export const createTest = (data) =>
   axiosClient.post("/tests/admin", data);
 
-export const getAllTests = () =>
-  axiosClient.get("/tests/admin");
+export const getAllTests = (params = {}) =>
+  axiosClient.get("/tests/admin",{params});
 
 export const getTestById = (id) =>
   axiosClient.get(`/tests/${id}`);
@@ -43,6 +43,9 @@ export const updateTest = (id, data) =>
 
 export const deleteTest = (id) =>
   axiosClient.delete(`/tests/admin/${id}`);
+
+export const getDeletedTests = (params = {}) =>
+  axiosClient.get(`/tests/admin/deleted`,{params});
 
 export const restoreTest = (id) =>
   axiosClient.patch(`/tests/admin/${id}/restore`);

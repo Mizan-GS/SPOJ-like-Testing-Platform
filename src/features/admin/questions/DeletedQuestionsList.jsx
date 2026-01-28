@@ -22,6 +22,8 @@ const [showFilters, setShowFilters] = useState(false);
     try {
       const res = await getDeletedQuestions(filters);
       setQuestions(res.data.data.questions);
+      console.log(res.data.data.questions);
+      
     } catch (error) {
       toast.error(
         error?.response?.data?.message ||
@@ -182,7 +184,7 @@ const [showFilters, setShowFilters] = useState(false);
           <thead className="bg-gray-50 text-gray-600">
             <tr>
               <th className="px-6 py-4 text-left font-medium">
-                Title
+                Description
               </th>
               <th className="px-6 py-4 text-center font-medium">
                 Category
@@ -206,7 +208,7 @@ const [showFilters, setShowFilters] = useState(false);
                 className="border-t hover:bg-purple-50"
               >
                 <td className="px-6 py-4 font-medium text-gray-800">
-                  {q.title}
+                  {q.description}
                 </td>
 
                 <td className="px-6 py-4 text-center text-gray-700">

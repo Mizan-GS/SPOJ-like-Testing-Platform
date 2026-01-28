@@ -47,6 +47,8 @@ function QuestionsList() {
      try {
     const res = await getAllQuestions(filters);
     setQuestions(res.data.data.questions);
+    console.log(res.data.data.questions);
+    
   } catch (error) {
     toast.error("Failed to load questions",error);
   } finally {
@@ -233,7 +235,7 @@ function QuestionsList() {
               {/* LEFT CONTENT */}
               <div className="space-y-1">
                 <h3 className="text-sm font-medium text-gray-900">
-                  {q.title}
+                  {q.description}
                 </h3>
 
                 <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
@@ -265,7 +267,9 @@ function QuestionsList() {
                 </button>
 
                 <button
-                  onClick={() => setEditingId(q._id)}
+                  onClick={(e) =>{
+                    e.stopPropagation();
+                     setEditingId(q._id)}}
 
                   className="text-sm text-purple-600 hover:text-purple-700"
                 >
@@ -274,7 +278,9 @@ function QuestionsList() {
 
                 {q.isActive !== false ? (
                   <button
-                    onClick={() => handleDelete(q._id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(q._id)}}
                     className="text-sm text-red-600 hover:text-red-700"
                   >
                     Delete
