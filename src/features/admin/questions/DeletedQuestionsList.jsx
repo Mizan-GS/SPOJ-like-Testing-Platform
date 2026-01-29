@@ -5,6 +5,7 @@ import {
   getDeletedQuestions,
   restoreQuestion,
 } from "../../../services/admin.api";
+import { useNavigate } from "react-router-dom";
 
 function DeletedQuestionsList() {
   const [questions, setQuestions] = useState([]);
@@ -15,7 +16,7 @@ function DeletedQuestionsList() {
     category: "",
     questionType: "",
     });
-
+const navigate=useNavigate();
 const [showFilters, setShowFilters] = useState(false);
 
   const fetchDeletedQuestions = async () => {
@@ -61,13 +62,17 @@ const [showFilters, setShowFilters] = useState(false);
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div>
+      <div className="flex justify-between">
+        <div>
         <h1 className="text-2xl font-semibold text-gray-800">
           Deleted Questions
         </h1>
         <p className="text-sm text-gray-500">
           Restore questions that were previously deleted
         </p>
+        </div>
+        <button onClick={()=>navigate("../questions")}
+          className="rounded-lg border px-4 h-10 text-md">Close</button>
       </div>
 
       {/* ---------------- FILTER BAR ---------------- */}

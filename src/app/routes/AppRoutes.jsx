@@ -52,10 +52,10 @@ const router = createBrowserRouter([
                               path:"assessments",
                               element:<Assessments/>
                          },
-                         {
-                              path:"questions/create",
-                              element:<CreateQuestion/>
-                         },
+                         // {
+                         //      path:"questions/create",
+                         //      element:<CreateQuestion/>
+                         // },
                          {
                               path:"questions/deleted",
                               element:<DeletedQuestionsList/>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
+import CreateQuestion from "./CreateQuestion";
 import {
   getAllQuestions,
   deleteQuestion,
@@ -28,6 +28,7 @@ function QuestionsList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const totalPages = Math.ceil(questions.length / pageSize);
 
@@ -106,7 +107,7 @@ function QuestionsList() {
 
           {/* Add */}
           <button
-            onClick={() => navigate("/admin/questions/create")}
+            onClick={() => setShowCreateModal(true)}
             className="rounded-lg bg-purple-500 px-4 py-2 text-sm text-white hover:bg-purple-600"
           >
             + Add Question
@@ -224,89 +225,81 @@ function QuestionsList() {
 
 
       {/* ================= QUESTIONS LIST ================= */}
-      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="divide-y">
-          {paginatedQuestions.map((q) => (
-            <div
-              key={q._id}
-              onClick={() => setViewingId(q._id)}
-              className="group flex items-center justify-between px-6 py-5 hover:bg-purple-50 transition"
-            >
-              {/* LEFT CONTENT */}
-              <div className="space-y-1">
-                <h3 className="text-sm font-medium text-gray-900">
-                  {q.description}
-                </h3>
+      <div className="grid sm:grid-cols-1 lg:grid-cols-2 grid-cols-3 gap-4">
+  {paginatedQuestions.map((q) => (
+    <div
+      key={q._id}
+      onClick={() => setViewingId(q._id)}
+      className="group cursor-pointer rounded-lg border bg-white p-4 shadow-sm hover:shadow-md transition"
+    >
+      {/* TITLE */}
+      <h3 className="font-medium text-md text-gray-900 line-clamp-2">
+        {q.description}
+      </h3>
 
-                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                  <span>{q.category}</span>
-                  <span>•</span>
-                  <span>{q.questionType}</span>
-                  <span>•</span>
-                  <span
-                    className={`rounded-full px-2 py-0.5 font-medium ${
-                      q.difficulty === "EASY"
-                        ? "bg-green-100 text-green-700"
-                        : q.difficulty === "MEDIUM"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {q.difficulty}
-                  </span>
-                </div>
-              </div>
+      {/* META INFO */}
+      <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-600">
+        <span className="rounded-full bg-gray-100 px-2 py-0.5">
+          {q.category}
+        </span>
 
-              {/* RIGHT ACTIONS */}
-              <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition">
-                <button
-                  onClick={() => setViewingId(q._id)}
-                  className="text-sm text-gray-600 hover:text-gray-900"
-                >
-                  View
-                </button>
+        <span className="rounded-full bg-gray-100 px-2 py-0.5">
+          {q.questionType}
+        </span>
 
-                <button
-                  onClick={(e) =>{
-                    e.stopPropagation();
-                     setEditingId(q._id)}}
-
-                  className="text-sm text-purple-600 hover:text-purple-700"
-                >
-                  Edit
-                </button>
-
-                {q.isActive !== false ? (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(q._id)}}
-                    className="text-sm text-red-600 hover:text-red-700"
-                  >
-                    Delete
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleRestore(q._id)}
-                    className="text-sm text-green-600 hover:text-green-700"
-                  >
-                    Restore
-                  </button>
-                )}
-              </div>
-              
-            </div>
-            
-            
-          ))}
-
-          {questions.length === 0 && (
-            <div className="px-6 py-16 text-center text-gray-500">
-              No questions found
-            </div>
-          )}
-        </div>
+        <span
+          className={`rounded-full px-2 py-0.5 font-medium ${
+            q.difficulty === "EASY"
+              ? "bg-green-100 text-green-700"
+              : q.difficulty === "MEDIUM"
+              ? "bg-yellow-100 text-yellow-700"
+              : "bg-red-100 text-red-700"
+          }`}
+        >
+          {q.difficulty}
+        </span>
       </div>
+
+      {/* TAGS */}
+      {q.tags?.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {q.tags.slice(0, 3).map((tag) => (
+            <span
+              key={tag}
+              className="text-xs rounded-md bg-purple-50 px-2 py-0.5 text-purple-700"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* ACTIONS */}
+      <div className="mt-4 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition">
+        <button
+          onClick={(e) => {
+            e.stopPropagation(); // 🔴 VERY IMPORTANT
+            setEditingId(q._id);
+          }}
+          className="rounded-lg border px-3 py-1 text-sm hover:bg-purple-50"
+        >
+          Edit
+        </button>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation(); // 🔴 VERY IMPORTANT
+            handleDelete(q._id);
+          }}
+          className="rounded-lg border border-red-200 px-3 py-1 text-sm text-red-600 hover:bg-red-50"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
+
       {/* ================= PAGINATION ================= */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Page size selector */}
@@ -365,6 +358,14 @@ function QuestionsList() {
     onClose={() => setViewingId(null)}
   />
 )}
+
+{showCreateModal && (
+  <CreateQuestion
+    onClose={() => setShowCreateModal(false)}
+    onSuccess={fetchQuestions}
+  />
+)}
+
 
 
     </div>

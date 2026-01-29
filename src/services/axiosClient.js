@@ -2,7 +2,7 @@ import axios from "axios";
 import { triggerLogout } from "./authEvents";
 
 const axiosClient = axios.create({
-  baseURL: "https://ln6fwfvn-8080.inc1.devtunnels.ms/",
+  baseURL: "http://localhost:8080/",
   headers: {
     "Content-Type": "application/json",
   },

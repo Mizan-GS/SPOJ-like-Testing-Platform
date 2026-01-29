@@ -13,8 +13,8 @@ const CATEGORY_OPTIONS = [
 
 const DIFFICULTY_OPTIONS = ["EASY", "MEDIUM", "HARD"];
 
-function CreateQuestion() {
-  const navigate = useNavigate();
+function CreateQuestion({onClose , onSuccess}) {
+  // const navigate = useNavigate();
 
   const [form, setForm] = useState({
     title: "",
@@ -115,7 +115,9 @@ function CreateQuestion() {
       setSubmitting(true);
       await createQuestion(payload);
       toast.success("Question created successfully");
-      navigate("/admin/questions");
+      // navigate("/admin/questions");
+      onSuccess?.();
+      onClose();
     } catch (error) {
       toast.error(
         error?.response?.data?.message ||
@@ -129,14 +131,35 @@ function CreateQuestion() {
   return (
     <div className="max-w-4xl space-y-8">
       {/* ================= HEADER ================= */}
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">
-          Create Question
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Add a new question to the question bank
-        </p>
-      </div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+    {/* Backdrop */}
+    <div
+      className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+      onClick={onClose}
+    />
+
+    {/* Modal */}
+    <div className="relative z-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-8 shadow-xl">
+      {/* EXISTING CONTENT BELOW */}
+      <div className="space-y-8">
+        {/* HEADER */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Create Question
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Add a new question to the question bank
+            </p>
+          </div>
+
+          {/* <button
+           
+            className="rounded-lg border px-4 py-2 text-sm"
+          >
+            Close
+          </button> */}
+        </div>
 
       {/* ================= FORM ================= */}
       <form
@@ -310,7 +333,7 @@ function CreateQuestion() {
         <div className="flex justify-end gap-4 pt-4">
           <button
             type="button"
-            onClick={() => navigate("/admin/questions")}
+            onClick={onClose}
             className="rounded-lg border px-6 py-2 text-sm"
           >
             Cancel
@@ -325,6 +348,9 @@ function CreateQuestion() {
           </button>
         </div>
       </form>
+    </div>
+    </div>
+    </div>
     </div>
   );
 }

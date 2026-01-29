@@ -4,11 +4,12 @@ import {
   getDeletedTests,
   restoreTest,
 } from "../../../services/admin.api";
+import { useNavigate } from "react-router-dom";
 
 function DeletedTests() {
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate()
   /* ----------------------------
      FETCH DELETED TESTS
   ----------------------------- */
@@ -49,15 +50,18 @@ function DeletedTests() {
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Deleted Tests
-        </h1>
-        <p className="text-sm text-gray-500">
-          Restore previously deleted tests
-        </p>
+      <div className="flex justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-800">
+            Deleted Tests
+          </h1>
+          <p className="text-sm text-gray-500">
+            Restore previously deleted tests
+          </p>
+        </div>
+        <button onClick={()=>navigate("../tests")}
+          className="rounded-lg border px-4 h-10 text-md">Close</button>
       </div>
-
       {/* LIST */}
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
         {tests.map((test) => (
