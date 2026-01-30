@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import OverviewCard from "./OverviewCards";
+import { useMemo } from "react";
 
+import {
+  Users,
+  FileText,
+  ClipboardList,
+  BarChart3,
+  BadgePercent,
+  SquareEqual,
+} from "lucide-react";
 import {
   getAdminOverviewAnalytics,
   getTestAnalytics,
@@ -9,6 +19,11 @@ import {
 import UsersListModal from "./modals/UsersListModal";
 import TestsListModal from "./modals/TestsListModal";
 import AssessmentsListModal from "./modals/AssessmentsListModal";
+import { getAllQuestions } from "../../../services/admin.api";
+import QuestionsByCategoryChart from "./charts/QuestionsByCategoryChart";
+import QuestionsByDifficultyChart from "./charts/QuestionsByDifficultyChart";
+import QuestionsAnalyticsTabs from "./charts/QuestionAnalyticsTabs";
+import TopTestsChart from "./charts/TopTestsChart";
 // import { set } from "react-hook-form";
 /* ------------------------------------
    REUSABLE STAT CARD
@@ -47,7 +62,7 @@ function AnimatedNumber({value,duration =800}){
         clearInterval(timer);
       }
       setDisplayValue(start)
-    },25)
+    },30)
 
     return()=> clearInterval(timer);
   },[value,duration])
@@ -62,6 +77,46 @@ function AdminDashboard() {
   const [showUsersModal, setShowUsersModal] = useState(false);
   const [showTestsModal, setShowTestsModal] = useState(false);
   const [showAssessmentsModal, setShowAssessmentsModal] = useState(false);
+  const [questions,setQuestions]=useState([])
+  const [testAnalytics, setTestAnalytics] = useState([]);
+
+  const categoryChartData=React.useMemo(()=>{
+    const map={};
+
+    questions.forEach((q)=>{
+      map[q.category] = (map[q.category] || 0)+1;
+    })
+    return Object.entries(map).map(
+      ([category,value])=>({
+        category,
+        value,
+      })
+    );
+  },[questions])
+
+
+  const difficultyChartData=useMemo(()=>{
+    const map={};
+    questions.forEach((q)=>{
+      map[q.difficulty] = (map[q.difficulty] || 0)+1;
+    });
+
+    return Object.entries(map).map(([key,value])=>({
+      category:key,
+      value,
+    }))
+  })
+
+  const top5Tests = useMemo(()=>{
+    return[...testAnalytics]
+      .sort((a,b)=>b.totalAttempts-a.totalAttempts)
+      .slice(0,5)
+      .map((t)=>({
+        title:t.title,
+        totalAttempts:t.totalAttempts
+      }))
+  },[testAnalytics])
+
 
 //   // const ITEMS_PER_PAGE = 10;
 
@@ -111,11 +166,13 @@ function AdminDashboard() {
           getUserAnalytics(),
 
         ]);
+        const questionsRes = await getAllQuestions();
+        setQuestions(questionsRes.data.data.questions || []);
 
         console.log(overviewRes.data.data);
         console.log(userRes.data.data);
         console.log(testRes.data.data);
-        
+        setTestAnalytics(testRes.data.data || [])
 
         setOverview(overviewRes.data.data);
         // setTestAnalytics(testRes.data.data || []);
@@ -168,19 +225,63 @@ function AdminDashboard() {
         </h2>
 
         <div className="flex gap-6 overflow-x-auto pb-2">
-          <StatCard label="Total Users" onClick={()=>setShowUsersModal(true)} value={overview.totalUsers} />
-          <StatCard label="Total Tests" onClick={()=>setShowTestsModal(true)} value={overview.totalTests} />
-          <StatCard label="Total Assessments" onClick={()=>setShowAssessmentsModal(true)} value={overview.totalAssessments} />
-          <StatCard label="Total Test Attempts" value={overview.testAttempts} />
-          <StatCard label="Total Assessments Attempts" value={overview.assessmentAttempts} />
-          
-          <StatCard
-            label="Average Score"
-            value={`${overview.averageScore}%`}
+          <OverviewCard
+            icon={Users}
+            label="Total Users"
+            value={overview.totalUsers}
+            description="Registered platform users"
+            onClick={() => setShowUsersModal(true)}
+            color="purple"
           />
+          <OverviewCard
+            icon={FileText}
+            label="Total Tests"
+            value={overview.totalTests}
+            onClick={() => setShowTestsModal(true)}
+            description="Question bank size"
+            color="red"
+          />
+          <OverviewCard
+            icon={ClipboardList}
+            label="Total Assessments"
+            onClick={() => setShowAssessmentsModal(true)}
+            value={overview.totalAssessments}
+            description="Created assessments"
+            color="green"
+          />
+          <OverviewCard
+            icon={BadgePercent}
+            label="Total Assessments Attempts"
+            // onClick={() => setShowAssessmentsModal(true)}
+            value={overview.assessmentAttempts}
+            description="Attempts on assessments"
+            color="yellow"
+          />
+          <OverviewCard
+            icon={SquareEqual}
+            label="Total Tests Attempts"
+            // onClick={() => setShowAssessmentsModal(true)}
+            value={overview.testAttempts}
+            description="Attempts on tests"
+            color="gray"
+          />
+         
         </div>
       </section>
 
+      <section className=" m-10 grid 
+    lg:grid-cols-2 md:grid-cols-1 
+    gap-6
+    auto-rows-fr
+    items-stretch">
+        {/* <QuestionsByCategoryChart data={categoryChartData}/>
+        <QuestionsByDifficultyChart data={difficultyChartData}/> */}
+        <QuestionsAnalyticsTabs
+        categoryData={categoryChartData}
+        difficultyData={difficultyChartData}/>
+
+        <TopTestsChart data={top5Tests}/>
+      </section>
 
 
       {showUsersModal && (
