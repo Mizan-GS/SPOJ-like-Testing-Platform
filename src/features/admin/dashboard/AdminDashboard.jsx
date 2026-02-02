@@ -24,6 +24,35 @@ import QuestionsByCategoryChart from "./charts/QuestionsByCategoryChart";
 import QuestionsByDifficultyChart from "./charts/QuestionsByDifficultyChart";
 import QuestionsAnalyticsTabs from "./charts/QuestionAnalyticsTabs";
 import TopTestsChart from "./charts/TopTestsChart";
+import { useTheme } from "../../../app/providers/ThemeProvider";
+
+// import { useEffect, useState } from "react";
+
+function useResolvedTheme() {
+  const [resolvedTheme, setResolvedTheme] = useState(
+    document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light"
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const isDark =
+        document.documentElement.classList.contains("dark");
+      setResolvedTheme(isDark ? "dark" : "light");
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return resolvedTheme;
+}
+
 // import { set } from "react-hook-form";
 /* ------------------------------------
    REUSABLE STAT CARD
@@ -31,12 +60,12 @@ import TopTestsChart from "./charts/TopTestsChart";
 function StatCard({ label, value ,onClick}) {
   return (
     <div  onClick={onClick}
-    className="min-w-[220px] flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition cursor-pointer" >
-      <p className="text-sm font-medium text-gray-500">
+    className="min-w-[220px] flex flex-col justify-between rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5 shadow-sm transition cursor-pointer" >
+      <p className="text-sm font-medium  text-[var(--color-text)]/70">
         {label}
       </p>
 
-      <p className="mt-2 text-3xl font-semibold text-purple-600">
+      <p className="mt-2 text-3xl font-semibold text-[var(--color-text)]">
         <AnimatedNumber value={value} />
       </p>
     </div>
@@ -73,12 +102,14 @@ function AnimatedNumber({value,duration =800}){
 function AdminDashboard() {
   const [overview, setOverview] = useState(null);
   // const [testAnalytics, setTestAnalytics] = useState([]);
-  // const [userAnalytics, setUserAnalytics] = useState([]);
+  const [users, setUsers] = useState([]);
   const [showUsersModal, setShowUsersModal] = useState(false);
   const [showTestsModal, setShowTestsModal] = useState(false);
   const [showAssessmentsModal, setShowAssessmentsModal] = useState(false);
   const [questions,setQuestions]=useState([])
   const [testAnalytics, setTestAnalytics] = useState([]);
+  const theme=useTheme()
+  const resolvedTheme = useResolvedTheme();
 
   const categoryChartData=React.useMemo(()=>{
     const map={};
@@ -109,11 +140,11 @@ function AdminDashboard() {
 
   const top5Tests = useMemo(()=>{
     return[...testAnalytics]
-      .sort((a,b)=>b.totalAttempts-a.totalAttempts)
+      .sort((a,b)=>b.totalTestAttempts-a.totalTestAttempts)
       .slice(0,5)
       .map((t)=>({
         title:t.title,
-        totalAttempts:t.totalAttempts
+        totalTestAttempts:t.totalTestAttempts
       }))
   },[testAnalytics])
 
@@ -172,8 +203,8 @@ function AdminDashboard() {
         console.log(overviewRes.data.data);
         console.log(userRes.data.data);
         console.log(testRes.data.data);
-        setTestAnalytics(testRes.data.data || [])
-
+        setTestAnalytics(testRes.data.data)
+        setUsers(userRes.data.data)
         setOverview(overviewRes.data.data);
         // setTestAnalytics(testRes.data.data || []);
         // setUserAnalytics(userRes.data.data || []);
@@ -191,12 +222,12 @@ function AdminDashboard() {
   }, []);
 
   if (loading) {
-    return <div className="text-gray-500">Loading dashboard...</div>;
+    return <div className="text-[var(--color-text)]">Loading dashboard...</div>;
   }
 
   if (!overview) {
     return (
-      <div className="text-red-500">
+      <div className="text-red-500 font-bold">
         Unable to load dashboard data.
       </div>
     );
@@ -208,10 +239,10 @@ function AdminDashboard() {
           PAGE HEADER
       ------------------------------------ */}
       <div>
-        <h1 className="text-2xl font-semibold text-gray-800">
+        <h1 className="text-2xl font-semibold text-[var(--color-text)]">
           Dashboard Overview
         </h1>
-        <p className="text-md text-gray-500">
+       <p className="text-md text-[var(--color-text)]/70">
           System-wide analytics summary
         </p>
       </div>
@@ -220,7 +251,7 @@ function AdminDashboard() {
           OVERVIEW STATS
       ------------------------------------ */}
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-800">
+        <h2 className="text-lg font-semibold text-[var(--color-text)]">
           Overview
         </h2>
 
@@ -273,19 +304,26 @@ function AdminDashboard() {
     lg:grid-cols-2 md:grid-cols-1 
     gap-6
     auto-rows-fr
-    items-stretch">
+    items-stretch
+    text-[var(--color-text)]
+    
+    ">
         {/* <QuestionsByCategoryChart data={categoryChartData}/>
         <QuestionsByDifficultyChart data={difficultyChartData}/> */}
         <QuestionsAnalyticsTabs
+         key={`questions-tabs-${resolvedTheme}`}
         categoryData={categoryChartData}
-        difficultyData={difficultyChartData}/>
+        difficultyData={difficultyChartData}
+      />
+        
 
         <TopTestsChart data={top5Tests}/>
       </section>
 
 
       {showUsersModal && (
-        <UsersListModal onClose={() => setShowUsersModal(false)} />
+        <UsersListModal onClose={() => setShowUsersModal(false)}
+        data={users} />
       )}
 
       {showTestsModal && (

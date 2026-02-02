@@ -14,6 +14,7 @@ import Assessments from "../../features/admin/Assessments/Assessments";
 import CreateQuestion from "../../features/admin/questions/CreateQuestion";
 import DeletedQuestionsList from "../../features/admin/questions/DeletedQuestionsList";
 import DeletedTests from "../../features/admin/tests/DeletedTests";
+import ResetPassword from "../../pages/ResetPassword";
 
 
 const router = createBrowserRouter([
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
                {
                     path:"/forgot-password",
                     element:<ForgotPassword/>
+               },
+               {
+                    path:"/reset-password",
+                    element:<ResetPassword/>
                },
                {
                     path:'/admin',

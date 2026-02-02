@@ -43,28 +43,34 @@ function OverviewCard({
   return (
     <div
       onClick={onClick}
-      className="min-w-[240px] cursor-pointer rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-xl "
+      className="min-w-[240px] cursor-pointer rounded-xl border
+        border-[var(--color-border)]
+        bg-[var(--color-bg)]
+        p-5
+        shadow-lg
+        transition
+        hover:shadow-xl "
     >
       {/* Icon */}
       <div
-        className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-${color}-100`}
+        className={`mb-4 flex h-10 w-10 items-center justify-center border border-[var(--color-border)] rounded-lg bg-${color}-100`}
       >
-        <Icon className={`h-5 w-5 text-${color}-600`} />
+        <Icon className={`h-5 w-5 text-${color}-600 `} />
       </div>
 
       {/* Number */}
-      <p className="text-3xl font-semibold text-gray-900">
+      <p className="text-3xl font-semibold text-[var(--color-text)]">
         {displayValue.toLocaleString()}
       </p>
 
       {/* Label */}
-      <p className="mt-1 text-sm font-medium text-gray-700">
+      <p className="mt-1 text-sm font-medium text-[var(--color-text)]">
         {label}
       </p>
 
       {/* Description */}
       {description && (
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-[var(--color-text)]">
           {description}
         </p>
       )}

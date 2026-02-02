@@ -49,7 +49,7 @@ const ResetPassword = () => {
       if (response.status === 200) {
         toast.success("Password reset successfully. Please login.");
         reset();
-        navigate("/login", { replace: true });
+        navigate("/", { replace: true });
       }
     } catch (err) {
       console.error("Reset password error:", err);
@@ -160,7 +160,7 @@ const ResetPassword = () => {
           Remember your password?{" "}
           <span
             className="cursor-pointer underline text-purple-500"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/")}
           >
             Back to Login
           </span>

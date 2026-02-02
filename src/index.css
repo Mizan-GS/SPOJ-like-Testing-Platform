@@ -1,5 +1,20 @@
 @import "tailwindcss";
+
+
+
+
+
+/* =========================
+   GLOBAL BASE STYLES
+   (Tailwind v4 compliant)
+========================= */
+@tailwind base;
+@tailwind utilities;
+
+
+
 /* 🔥 Fix Chrome autofill white background */
+
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
@@ -10,4 +25,36 @@ select:-webkit-autofill {
   -webkit-text-fill-color: white !important;
   caret-color: white;
   transition: background-color 9999s ease-in-out 0s;
+}
+
+
+:root {
+  /* LIGHT THEME */
+  --color-primary: #EEEEEE;
+  --color-secondary: #1B211A;
+
+  --color-bg: #EEEEEE;
+  --color-text: #1B211A;
+  --color-border: #1B211A;
+}
+
+.dark {
+  /* DARK THEME */
+  --color-primary: #1B211A;
+  --color-secondary: #EEEEEE;
+
+  --color-bg: #1B211A;
+  --color-text: #EEEEEE;
+  --color-border: #EEEEEE;
+}
+
+/* =========================
+   TAILWIND THEME BRIDGE (V4)
+========================= */
+@theme {
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-bg: var(--color-bg);
+  --color-text: var(--color-text);
+  --color-border: var(--color-border);
 }

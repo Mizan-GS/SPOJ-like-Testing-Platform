@@ -1,145 +1,139 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { getUserAnalytics } from "../../../../services/admin.api";
+import ModalShell from "../../../../components/common/modal/ModalShell";
+
+const PAGE_SIZE = 8; // 👈 adjust easily later
 
 function UsersListModal({ onClose }) {
   /* =========================
      STATE
   ========================= */
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
-
-  const scrollRef = useRef(null);
 
   /* =========================
      FETCH USERS
   ========================= */
   const fetchUsers = async () => {
-  if (loading || !hasMore) return;
+    try {
+      setLoading(true);
+      const res = await getUserAnalytics();
+      setUsers(res.data.data || []);
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to load users"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  try {
-    setLoading(true);
-
-    const res = await getUserAnalytics();
-
-    const usersArray = res.data.data;
-
-    setUsers((prev) => [...prev, ...usersArray]);
-
-    // ❗ backend doesn't support pagination yet
-    setHasMore(false);
-  } catch (err) {
-    toast.error(
-      err?.response?.data?.message ||
-        "Failed to load users"
-    );
-  } finally {
-    setLoading(false);
-  }
-};
-
-  /* =========================
-     INITIAL LOAD
-  ========================= */
   useEffect(() => {
     fetchUsers();
-    // eslint-disable-next-line
   }, []);
 
   /* =========================
-     SCROLL HANDLER
+     PAGINATION (FRONTEND)
   ========================= */
-  const handleScroll = () => {
-    const el = scrollRef.current;
-    if (!el || loading || !hasMore) return;
+  const totalPages = Math.ceil(users.length / PAGE_SIZE);
 
-    if (
-      el.scrollTop + el.clientHeight >=
-      el.scrollHeight - 80
-    ) {
-      fetchUsers();
-    }
-  };
+  const paginatedUsers = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    return users.slice(start, end);
+  }, [users, page]);
 
   /* =========================
      UI
   ========================= */
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* BACKDROP */}
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
+    <ModalShell title="All Users" onClose={onClose} width="max-w-5xl">
+      {/* LOADING */}
+      {loading && (
+        <p className="text-center text-sm text-gray-500">
+          Loading users...
+        </p>
+      )}
 
-      {/* MODAL */}
-      <div className="relative z-10 w-full max-w-3xl rounded-2xl bg-white shadow-xl">
-        {/* HEADER */}
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="text-xl font-semibold text-gray-800">
-            All Users
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-800"
-          >
-            ✕
-          </button>
-        </div>
+      {/* TABLE */}
+      {!loading && (
+        <>
+          <div className="overflow-hidden rounded-xl border">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 text-gray-600">
+                <tr>
+                  <th className="px-6 py-4 text-left font-medium">
+                    Name
+                  </th>
+                  <th className="px-6 py-4 text-left font-medium">
+                    Email
+                  </th>
+                  <th className="px-6 py-4 text-center font-medium">
+                    Attempts
+                  </th>
+                  <th className="px-6 py-4 text-center font-medium">
+                    Avg Score
+                  </th>
+                </tr>
+              </thead>
 
-        {/* LIST */}
-        <div
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className="max-h-[70vh] overflow-y-auto p-6 space-y-4"
-        >
-          {users.map((user) => (
-            <div
-              key={user.userId}
-              className="flex items-center justify-between rounded-xl border bg-gray-50 px-5 py-4"
-            >
-              <div>
-                <p className="font-medium text-gray-800">
-                  {user.name}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {user.email}
-                </p>
-              </div>
+              <tbody>
+                {paginatedUsers.map((user, idx) => (
+                  <tr
+                    key={user.userId}
+                    className={`border-t ${
+                      idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    }`}
+                  >
+                    <td className="px-6 py-4 font-medium text-gray-800">
+                      {user.name}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {user.email}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {user.totalTestAttempts}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700">
+                        {user.averageScore}%
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-              <div className="text-right">
-                <p className="text-sm text-gray-600">
-                  Attempts:{" "}
-                  <span className="font-medium">
-                    {user.totalAttempts}
-                  </span>
-                </p>
+          {/* PAGINATION CONTROLS */}
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              Page {page} of {totalPages}
+            </p>
 
-                <span className="mt-1 inline-block rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700">
-                  Avg: {user.averageScore}%
-                </span>
-              </div>
+            <div className="flex gap-2">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+                className="rounded-lg border px-4 py-2 text-sm disabled:opacity-50"
+              >
+                Prev
+              </button>
+
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+                className="rounded-lg border px-4 py-2 text-sm disabled:opacity-50"
+              >
+                Next
+              </button>
             </div>
-          ))}
-
-          {/* LOADING */}
-          {loading && (
-            <p className="text-center text-sm text-gray-500">
-              Loading more users...
-            </p>
-          )}
-
-          {/* END */}
-          {!hasMore && (
-            <p className="text-center text-sm text-gray-400">
-              No more users
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
+          </div>
+        </>
+      )}
+    </ModalShell>
   );
 }
 

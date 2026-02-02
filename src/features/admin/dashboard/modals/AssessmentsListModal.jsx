@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import axiosClient from "../../../../services/axiosClient";
+import { getAllAssessments } from "../../../../services/admin.api";
+import ModalShell from "../../../../components/common/modal/ModalShell";
+
+const PAGE_SIZE = 8;
 
 function AssessmentsListModal({ onClose }) {
   /* =========================
@@ -8,110 +11,172 @@ function AssessmentsListModal({ onClose }) {
   ========================= */
   const [assessments, setAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
 
   /* =========================
      FETCH ASSESSMENTS
   ========================= */
-  useEffect(() => {
-    const fetchAssessments = async () => {
-      try {
-        const res = await axiosClient.get("/assessments");
-        setAssessments(res.data.data?.result || []);
-      } catch (err) {
-        toast.error(
-          err?.response?.data?.message ||
-            "Failed to load assessments"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchAssessments = async () => {
+    try {
+      setLoading(true);
 
+      // Admin & backend-ready
+      const res = await getAllAssessments({});
+      console.log(res.data.data);
+      
+      setAssessments(res.data.data?.result || []);
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message ||
+          "Failed to load assessments"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchAssessments();
   }, []);
+
+  /* =========================
+     PAGINATION
+  ========================= */
+  const totalPages = Math.ceil(
+    assessments.length / PAGE_SIZE
+  );
+
+  const paginatedAssessments = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    return assessments.slice(start, end);
+  }, [assessments, page]);
 
   /* =========================
      UI
   ========================= */
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* BACKDROP */}
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
+    <ModalShell
+      title="All Assessments"
+      onClose={onClose}
+      width="max-w-5xl"
+    >
+      {loading && (
+        <p className="text-center text-sm text-gray-500">
+          Loading assessments...
+        </p>
+      )}
 
-      {/* MODAL */}
-      <div className="relative z-10 w-full max-w-3xl rounded-2xl bg-white shadow-xl">
-        {/* HEADER */}
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="text-xl font-semibold text-gray-800">
-            All Assessments
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-800"
-          >
-            ✕
-          </button>
-        </div>
+      {!loading && (
+        <>
+          {/* TABLE */}
+          <div className="overflow-hidden rounded-xl border">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 text-gray-600">
+                <tr>
+                  <th className="px-6 py-4 text-left font-medium">
+                    Title
+                  </th>
+                  {/* <th className="px-6 py-4 text-center font-medium">
+                    Type
+                  </th> */}
+                  <th className="px-6 py-4 text-center font-medium">
+                    Sections
+                  </th>
+                  <th className="px-6 py-4 text-center font-medium">
+                    Duration
+                  </th>
+                  <th className="px-6 py-4 text-center font-medium">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-center font-medium">
+                    Created At
+                  </th>
+                </tr>
+              </thead>
 
-        {/* CONTENT */}
-        <div className="max-h-[70vh] overflow-y-auto p-6 space-y-4">
-          {loading && (
-            <p className="text-center text-gray-500">
-              Loading assessments...
+              <tbody>
+                {paginatedAssessments.map((a, idx) => (
+                  <tr
+                    key={a._id}
+                    className={`border-t ${
+                      idx % 2 === 0
+                        ? "bg-white"
+                        : "bg-gray-50"
+                    }`}
+                  >
+                    <td className="px-6 py-4 font-medium text-gray-800">
+                      {a.title}
+                    </td>
+
+                    {/* <td className="px-6 py-4 text-center">
+                      {a.assessmentType}
+                    </td> */}
+
+                    <td className="px-6 py-4 text-center">
+                      {a.sections?.length ?? 0}
+                    </td>
+
+                    <td className="px-6 py-4 text-center">
+                      {a.totalDuration} min
+                    </td>
+
+                    <td className="px-6 py-4 text-center">
+                      <span
+                        className={`rounded-full px-3 py-1 text-sm font-medium ${
+                          a.isActive
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {a.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+
+                    <td className="px-6 py-4 text-center text-gray-600">
+                      {a.createdAt
+                        ? new Date(
+                            a.createdAt
+                          ).toLocaleDateString()
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* PAGINATION */}
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              Page {page} of {totalPages}
             </p>
-          )}
 
-          {!loading && assessments.length === 0 && (
-            <p className="text-center text-gray-500">
-              No assessments found
-            </p>
-          )}
+            <div className="flex gap-2">
+              <button
+                disabled={page === 1}
+                onClick={() =>
+                  setPage((p) => p - 1)
+                }
+                className="rounded-lg border px-4 py-2 text-sm disabled:opacity-50"
+              >
+                Prev
+              </button>
 
-          {assessments.filter((assessment) =>assessment.isActive)
-          .map ((assessment)=>(
-            <div
-              key={assessment._id}
-              className="rounded-xl border bg-gray-50 px-5 py-4 hover:shadow-sm transition"
-            >
-              <h3 className="font-medium text-gray-800">
-                {assessment.title}
-              </h3>
-
-              <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
-                <span>
-                  🧩 {assessment.sections.length} sections
-                </span>
-                <span>
-                  ⏱ {assessment.totalDuration} min
-                </span>
-                <span>
-                  📌 {assessment.assessmentType}
-                </span>
-                <span
-                  className={`font-medium ${
-                    assessment.isActive
-                      ? "text-green-600"
-                      : "text-red-500"
-                  }`}
-                >
-                  {assessment.isActive ? "Active" : "Inactive"}
-                </span>
-              </div>
-
-              <p className="mt-2 text-xs text-gray-400">
-                Created on{" "}
-                {new Date(
-                  assessment.createdAt
-                ).toLocaleDateString()}
-              </p>
+              <button
+                disabled={page === totalPages}
+                onClick={() =>
+                  setPage((p) => p + 1)
+                }
+                className="rounded-lg border px-4 py-2 text-sm disabled:opacity-50"
+              >
+                Next
+              </button>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
+          </div>
+        </>
+      )}
+    </ModalShell>
   );
 }
 

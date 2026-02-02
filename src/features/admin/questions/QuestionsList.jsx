@@ -88,7 +88,7 @@ function QuestionsList() {
       {/* ================= PAGE HEADER ================= */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">
+          <h1 className=" text-2xl font-semibold text-gray-800">
             Questions
           </h1>
           <p className="text-sm text-gray-500">
