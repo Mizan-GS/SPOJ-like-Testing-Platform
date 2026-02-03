@@ -31,11 +31,11 @@ function TopTestsChart({ data }) {
     const bgColor = styles.getPropertyValue("--color-bg").trim();
     const textColor = styles.getPropertyValue("--color-text").trim();
     const primaryColor = styles.getPropertyValue("--color-primary").trim();
-
+    const secondaryColor= styles.getPropertyValue("--color-secondary").trim()
 
     root.interfaceColors.setAll({
-      text: am5.color(textColor),
-      grid: am5.color(textColor),
+      text: am5.color(secondaryColor),
+      grid: am5.color(secondaryColor),
     });
     // 2️⃣ Create chart
     const chart = root.container.children.push(
@@ -45,6 +45,15 @@ function TopTestsChart({ data }) {
         panX: false,
       })
     );
+
+
+    chart.set(
+      "cursor",
+      am5xy.XYCursor.new(root, {
+        behavior: "none",
+      })
+    );
+
 
     // 3️⃣ Y Axis (Categories → test titles)
     const yAxis = chart.yAxes.push(
@@ -57,7 +66,7 @@ function TopTestsChart({ data }) {
       })
     );
     yAxis.get("renderer").labels.template.setAll({
-      fill: am5.color(textColor),
+      fill: am5.color(secondaryColor),
       fontSize: 12,
     });
 
@@ -90,7 +99,7 @@ function TopTestsChart({ data }) {
     series.columns.template.setAll({
       cornerRadiusTR: 8,
       cornerRadiusBR: 8,
-      fill: am5.color(textColor), // purple-500
+      fill: am5.color(secondaryColor), // purple-500
       strokeOpacity: 0,
     });
 
@@ -102,8 +111,14 @@ function TopTestsChart({ data }) {
     series.appear(1000);
     chart.appear(1000, 100);
 
+    chart.set("background", am5.Rectangle.new(root, {
+   fill: am5.color(primaryColor),
+   fillOpacity: 1
+ }));
+
+
     return () => root.dispose();
-  }, [data]);
+  }, [data,theme]);
 
   return (
     <div className="rounded-xl border border-border bg-bg p-6 shadow-sm">

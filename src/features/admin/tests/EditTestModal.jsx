@@ -23,9 +23,7 @@ function EditTestModal({ testId, onClose, onUpdated }) {
   const [questions, setQuestions] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
 
-  /* -----------------------------
-     FETCH TEST + QUESTIONS
-  ------------------------------ */
+  /* ================= FETCH TEST + QUESTIONS ================= */
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -40,7 +38,7 @@ function EditTestModal({ testId, onClose, onUpdated }) {
           duration: test.duration,
           minQuestionToAttempt:
             test.rules?.minQuestionToAttempt || "",
-        }); 
+        });
 
         setSelectedIds(test.questionIds || []);
 
@@ -51,15 +49,19 @@ function EditTestModal({ testId, onClose, onUpdated }) {
 
         const allQuestions = qRes.data.data.questions || [];
 
-        // 3️⃣ reorder questions
+        // 3️⃣ reorder questions (selected on top)
         const selectedSet = new Set(test.questionIds || []);
         const ordered = [
-          ...allQuestions.filter((q) => selectedSet.has(q._id)),
-          ...allQuestions.filter((q) => !selectedSet.has(q._id)),
+          ...allQuestions.filter((q) =>
+            selectedSet.has(q._id)
+          ),
+          ...allQuestions.filter(
+            (q) => !selectedSet.has(q._id)
+          ),
         ];
 
         setQuestions(ordered);
-      } catch (err) {
+      } catch {
         toast.error("Failed to load test details");
         onClose();
       } finally {
@@ -70,9 +72,7 @@ function EditTestModal({ testId, onClose, onUpdated }) {
     fetchData();
   }, [testId, onClose]);
 
-  /* -----------------------------
-     HANDLERS
-  ------------------------------ */
+  /* ================= HANDLERS ================= */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
@@ -100,7 +100,9 @@ function EditTestModal({ testId, onClose, onUpdated }) {
       duration: Number(form.duration),
       questionIds: selectedIds,
       rules: {
-        minQuestionToAttempt: Number(form.minQuestionToAttempt),
+        minQuestionToAttempt: Number(
+          form.minQuestionToAttempt
+        ),
       },
     };
 
@@ -112,7 +114,8 @@ function EditTestModal({ testId, onClose, onUpdated }) {
       onClose();
     } catch (err) {
       toast.error(
-        err?.response?.data?.message || "Failed to update test"
+        err?.response?.data?.message ||
+          "Failed to update test"
       );
     } finally {
       setSubmitting(false);
@@ -123,90 +126,126 @@ function EditTestModal({ testId, onClose, onUpdated }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
+      {/* BACKDROP */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal */}
+      {/* MODAL */}
       <div className="relative z-10 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-8 shadow-xl">
         <h2 className="text-xl font-semibold text-gray-800">
           Edit Test
         </h2>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-          <input
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            className="w-full rounded-lg border px-4 py-2"
-          />
+          {/* TITLE */}
+          <div>
+            <label className="text-sm font-medium text-gray-700">
+              Test Title
+            </label>
+            <input
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              className="mt-1 w-full rounded-lg border px-4 py-2"
+            />
+          </div>
 
-          <select
-            value={form.category}
-            disabled
-            className="w-full rounded-lg border bg-gray-100 px-4 py-2"
-          >
-            {CATEGORY_OPTIONS.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
+          {/* CATEGORY (LOCKED) */}
+          <div>
+            <label className="text-sm font-medium text-gray-700">
+              Category
+            </label>
+            <select
+              value={form.category}
+              disabled
+              className="mt-1 w-full rounded-lg border bg-gray-100 px-4 py-2"
+            >
+              {CATEGORY_OPTIONS.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </div>
 
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            rows={3}
-            className="w-full rounded-lg border px-4 py-2"
-          />
+          {/* DESCRIPTION */}
+          <div>
+            <label className="text-sm font-medium text-gray-700">
+              Description
+            </label>
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              rows={5}
+              className="mt-1 w-full rounded-lg border px-4 py-2"
+            />
+          </div>
 
+          {/* RULES */}
           <div className="grid grid-cols-2 gap-4">
-            <input
-              name="duration"
-              type="number"
-              value={form.duration}
-              onChange={handleChange}
-              className="rounded-lg border px-4 py-2"
-            />
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Duration (minutes)
+              </label>
+              <input
+                name="duration"
+                type="number"
+                value={form.duration}
+                onChange={handleChange}
+                className="mt-1 w-full rounded-lg border px-4 py-2"
+              />
+            </div>
 
-            <input
-              name="minQuestionToAttempt"
-              type="number"
-              value={form.minQuestionToAttempt}
-              onChange={handleChange}
-              className="rounded-lg border px-4 py-2"
-            />
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Min Questions to Attempt
+              </label>
+              <input
+                name="minQuestionToAttempt"
+                type="number"
+                value={form.minQuestionToAttempt}
+                onChange={handleChange}
+                className="mt-1 w-full rounded-lg border px-4 py-2"
+              />
+            </div>
           </div>
 
           {/* QUESTIONS */}
           <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700">
-              Questions (selected on top)
-            </p>
+            <label className="text-sm font-medium text-gray-700">
+              Questions (selected shown first)
+            </label>
 
             <div className="max-h-64 overflow-y-auto rounded-lg border">
               {questions.map((q) => {
-                const checked = selectedIds.includes(q._id);
+                const checked =
+                  selectedIds.includes(q._id);
                 return (
                   <label
                     key={q._id}
-                    className={`flex items-center gap-3 px-4 py-3 border-b last:border-b-0 cursor-pointer ${
-                      checked ? "bg-purple-50" : ""
+                    className={`flex cursor-pointer items-start gap-3 border-b px-4 py-3 last:border-b-0 ${
+                      checked
+                        ? "bg-purple-50"
+                        : ""
                     }`}
                   >
                     <input
                       type="checkbox"
                       checked={checked}
-                      onChange={() => toggleQuestion(q._id)}
-                      className="accent-purple-500"
+                      onChange={() =>
+                        toggleQuestion(q._id)
+                      }
+                      className="mt-1 accent-purple-500"
                     />
+
                     <div>
                       <p className="text-sm font-medium text-gray-800">
                         {q.title}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {q.difficulty} • {q.questionType}
+                        {q.difficulty} •{" "}
+                        {q.questionType}
                       </p>
                     </div>
                   </label>
@@ -229,7 +268,9 @@ function EditTestModal({ testId, onClose, onUpdated }) {
               disabled={submitting}
               className="rounded-lg bg-purple-500 px-6 py-2 text-white disabled:opacity-50"
             >
-              {submitting ? "Saving..." : "Save Changes"}
+              {submitting
+                ? "Saving..."
+                : "Save Changes"}
             </button>
           </div>
         </form>

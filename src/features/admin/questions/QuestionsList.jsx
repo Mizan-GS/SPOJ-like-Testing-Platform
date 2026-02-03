@@ -16,6 +16,7 @@ function QuestionsList() {
     difficulty: "",
     category: "",
     questionType: "",
+    // description:"",
   });
 
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ function QuestionsList() {
   };
 
   if (loading) {
-    return <div className="text-gray-500">Loading questions…</div>;
+    return <div className="text-text">Loading questions…</div>;
   }
 
   return (
@@ -88,10 +89,10 @@ function QuestionsList() {
       {/* ================= PAGE HEADER ================= */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className=" text-2xl font-semibold text-gray-800">
+          <h1 className=" text-2xl font-semibold text-text">
             Questions
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text/70">
             Manage active questions
           </p>
         </div>
@@ -100,7 +101,7 @@ function QuestionsList() {
           {/* Bin link */}
           <button
             onClick={() => navigate("/admin/questions/deleted")}
-            className="rounded-lg border px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+            className="rounded-lg border border-border px-4 py-2 text-sm text-text hover:bg-[color:var(--color-surface)]"
           >
             🗑 Deleted Questions
           </button>
@@ -108,7 +109,7 @@ function QuestionsList() {
           {/* Add */}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="rounded-lg bg-purple-500 px-4 py-2 text-sm text-white hover:bg-purple-600"
+            className="rounded-lg bg-secondary border border-border px-4 py-2 text-sm text-primary hover:opacity-90"
           >
             + Add Question
           </button>
@@ -116,7 +117,7 @@ function QuestionsList() {
       </div>
 
       {/* ---------------- FILTER BAR ---------------- */}
-<div className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+<div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-[color:var(--color-surface)] p-3 shadow-sm">
   {/* Search */}
   <input
     placeholder="Search questions..."
@@ -124,14 +125,14 @@ function QuestionsList() {
     onChange={(e) =>
       setFilters((p) => ({ ...p, search: e.target.value }))
     }
-    className="flex-1 rounded-lg border px-4 py-2"
+    className="flex-1 rounded-lg border border-border bg-bg text-text px-4 py-2"
   />
   
 
   {/* Filters Toggle */}
   <button
     onClick={() => setShowFilters((p) => !p)}
-    className="rounded-lg border px-4 py-2 text-sm hover:bg-purple-50"
+    className="rounded-lg border px-4 py-2 text-sm hover:bg-primary/80"
   >
     Filters
   </button>
@@ -149,20 +150,25 @@ function QuestionsList() {
           questionType: "",
         })
       }
-      className="text-sm text-purple-600 hover:underline"
+      className="text-sm bg-[color:var(--color-primary)]
+text-secondary
+ hover:underline"
     >
       Clear
     </button>
   )}
 </div>
 {showFilters && (
-  <div className="mt-3 grid grid-cols-1 gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:grid-cols-3">
+  <div className="mt-3 grid grid-cols-1 gap-4 rounded-xl border border-border
+bg-[color:var(--color-surface)]
+ p-4 shadow-sm md:grid-cols-3">
     <select
       value={filters.difficulty}
       onChange={(e) =>
         setFilters((p) => ({ ...p, difficulty: e.target.value }))
       }
-      className="rounded-lg border px-4 py-2"
+      className="rounded-lg border px-4 py-2 bg-[color:var(--color-primary)]
+text-secondary"
     >
       <option value="">Difficulty</option>
       <option value="EASY">Easy</option>
@@ -175,7 +181,8 @@ function QuestionsList() {
       onChange={(e) =>
         setFilters((p) => ({ ...p, category: e.target.value }))
       }
-      className="rounded-lg border px-4 py-2"
+      className="rounded-lg border px-4 py-2 bg-[color:var(--color-primary)]
+text-secondary"
     >
       <option value="">Category</option>
       <option value="CODING">Coding</option>
@@ -192,7 +199,8 @@ function QuestionsList() {
           questionType: e.target.value,
         }))
       }
-      className="rounded-lg border px-4 py-2"
+      className="rounded-lg border px-4 py-2 bg-[color:var(--color-primary)]
+text-secondary"
     >
       <option value="">Question Type</option>
       <option value="CODING">Coding</option>
@@ -230,10 +238,18 @@ function QuestionsList() {
     <div
       key={q._id}
       onClick={() => setViewingId(q._id)}
-      className="group cursor-pointer rounded-lg border bg-white p-4 shadow-sm hover:shadow-md transition"
+      className="
+  group cursor-pointer
+  rounded-lg
+  border border-border
+  bg-[color:var(--color-surface)]
+  p-4
+  shadow-sm hover:shadow-md
+  transition
+"
     >
       {/* TITLE */}
-      <h3 className="font-medium text-md text-gray-900 line-clamp-2">
+      <h3 className="font-medium text-md text-text line-clamp-2">
         {q.description}
       </h3>
 
@@ -281,7 +297,7 @@ function QuestionsList() {
             e.stopPropagation(); // 🔴 VERY IMPORTANT
             setEditingId(q._id);
           }}
-          className="rounded-lg border px-3 py-1 text-sm hover:bg-purple-50"
+          className="rounded-lg border px-3 py-1 text-sm hover:bg-primary/80"
         >
           Edit
         </button>

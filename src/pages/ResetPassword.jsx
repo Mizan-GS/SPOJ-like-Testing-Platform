@@ -101,7 +101,7 @@ const ResetPassword = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-1 top-1/2 -translate-y-1/2 text-purple-300 hover:text-white"
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  {/* {showPassword ? "🙈" : "👁️"} */}
                 </button>
               </div>
             </fieldset>

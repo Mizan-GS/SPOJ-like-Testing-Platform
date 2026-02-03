@@ -20,10 +20,11 @@ function TestCasesSection({
           className="rounded-lg border border-gray-200 p-4 space-y-3 bg-gray-50"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
+            <textarea
               placeholder="Input"
               value={tc.input}
               readOnly={readOnly}
+              rows={4}
               onChange={(e) =>
                 onChange?.(idx, "input", e.target.value)
               }
@@ -32,10 +33,11 @@ function TestCasesSection({
               }`}
             />
 
-            <input
+            <textarea
               placeholder="Output"
               value={tc.output}
               readOnly={readOnly}
+              rows={4}
               onChange={(e) =>
                 onChange?.(idx, "output", e.target.value)
               }
@@ -52,7 +54,7 @@ function TestCasesSection({
             onChange={(e) =>
               onChange?.(idx, "explanation", e.target.value)
             }
-            rows={2}
+            rows={6}
             className={`w-full rounded-lg border px-4 py-2 text-sm ${
               readOnly ? "bg-gray-100 cursor-not-allowed" : ""
             }`}

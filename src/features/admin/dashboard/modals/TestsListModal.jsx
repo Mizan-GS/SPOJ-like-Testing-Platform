@@ -81,9 +81,9 @@ function TestsListModal({ onClose }) {
                   <th className="px-6 py-4 text-center font-medium">
                     Created At
                   </th>
-                  <th className="px-6 py-4 text-center font-medium">
+                  {/* <th className="px-6 py-4 text-center font-medium">
                     Avg Score
-                  </th>
+                  </th> */}
                 </tr>
               </thead>
 
@@ -117,11 +117,11 @@ function TestsListModal({ onClose }) {
                         : "-"}
                     </td>
 
-                    <td className="px-6 py-4 text-center">
+                    {/* <td className="px-6 py-4 text-center">
                       <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700">
                         {test.averageScore}%
                       </span>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>

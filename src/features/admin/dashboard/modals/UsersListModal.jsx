@@ -88,12 +88,12 @@ function UsersListModal({ onClose }) {
                     }`}
                   >
                     <td className="px-6 py-4 font-medium text-gray-800">
-                      {user.name}
+                      {user.userName}
                     </td>
                     <td className="px-6 py-4 text-gray-600">
                       {user.email}
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-4 text-black text-center">
                       {user.totalTestAttempts}
                     </td>
                     <td className="px-6 py-4 text-center">

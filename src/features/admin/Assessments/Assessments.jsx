@@ -107,6 +107,7 @@ function Assessments() {
             <div
               key={a._id}
               className="flex items-center justify-between rounded-xl border bg-white px-6 py-4 shadow-sm hover:bg-purple-50 transition"
+              onClick={() => setEditingId(a._id)}
             >
               {/* LEFT */}
               <div className="space-y-1">
@@ -121,7 +122,8 @@ function Assessments() {
               {/* RIGHT ACTIONS */}
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => setEditingId(a._id)}
+                  onClick={(e) => {e.stopPropagation();
+                    setEditingId(a._id)}}
                   className="rounded-lg border px-4 py-2 text-sm hover:bg-purple-100"
                 >
                   Edit

@@ -1,36 +1,28 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import TestCasesSection from "./TestCasesSection";
 import { createQuestion } from "../../../services/admin.api";
 
-const CATEGORY_OPTIONS = [
-  "CODING",
-  "APTITUDE",
-  "LOGICAL",
-  "VERBAL",
-];
-
+const CATEGORY_OPTIONS = ["CODING", "APTITUDE", "LOGICAL", "VERBAL"];
 const DIFFICULTY_OPTIONS = ["EASY", "MEDIUM", "HARD"];
 
-function CreateQuestion({onClose , onSuccess}) {
-  // const navigate = useNavigate();
-
+function CreateQuestion({ onClose, onSuccess }) {
   const [form, setForm] = useState({
-    title: "",
+    title: "",                       // 🔹 optional
     description: "",
     category: "CODING",
     questionType: "CODING",
     difficulty: "EASY",
     tags: "",
-    constraints: "",
+    constraints: "",                 // 🔹 string in UI
     options: ["", "", "", ""],
-    correctAnswer: null,
+    correctAnswerIndex: null,        // ✅ REQUIRED for MCQ
     testCases: [
       { input: "", output: "", explanation: "" },
+      { input: "", output: "", explanation: "" },
+      { input: "", output: "", explanation: "" }, // ✅ minimum 3
     ],
   });
-
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -65,21 +57,34 @@ function CreateQuestion({onClose , onSuccess}) {
   };
 
   const removeTestCase = (index) => {
+    if (form.testCases.length <= 3) {
+      toast.error("Minimum 3 test cases required");
+      return;
+    }
+
     setForm((prev) => ({
       ...prev,
       testCases: prev.testCases.filter((_, i) => i !== index),
     }));
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (isMCQ && form.correctAnswerIndex === null) {
+      toast.error("Select correct answer");
+      return;
+    }
+
+    if (isCoding && form.testCases.length < 3) {
+      toast.error("Minimum 3 test cases required");
+      return;
+    }
+
     const payload = {
-      
       category: form.category,
       questionType: form.questionType,
-      title: form.title,
+      title: form.title || undefined, // ✅ optional
       description: form.description,
       difficulty: form.difficulty,
       tags: form.tags
@@ -88,40 +93,41 @@ function CreateQuestion({onClose , onSuccess}) {
         .filter(Boolean),
     };
 
+    // ✅ CODING
     if (isCoding) {
-      payload.constraints = form.constraints;
+      payload.constraints = form.constraints
+        ? form.constraints.split(" ").filter(Boolean) // 🔹 string → array
+        : [];
 
       payload.testCases = form.testCases
       .filter(tc => tc.input && tc.output)
       .map(tc => ({
-        input: tc.input,
+        input: tc.input
+          .split(" ")                 // ✅ multi-line → array
+          .map(line => line.trim())
+          .filter(Boolean),
         output: tc.output,
         explanation: tc.explanation || "",
       }));
 
     }
 
-
+    // ✅ MCQ
     if (isMCQ) {
-      const cleanedOptions = form.options.filter(Boolean);
-
-        payload.options = cleanedOptions;
-        payload.correctAnswer =
-        cleanedOptions[form.correctAnswerIndex];
-
+      payload.options = form.options;
+      payload.correctAnswer =
+        form.options[form.correctAnswerIndex];
     }
 
     try {
       setSubmitting(true);
       await createQuestion(payload);
       toast.success("Question created successfully");
-      // navigate("/admin/questions");
       onSuccess?.();
       onClose();
-    } catch (error) {
+    } catch (err) {
       toast.error(
-        error?.response?.data?.message ||
-          "Failed to create question"
+        err?.response?.data?.message || "Failed to create question"
       );
     } finally {
       setSubmitting(false);
@@ -129,228 +135,115 @@ function CreateQuestion({onClose , onSuccess}) {
   };
 
   return (
-    <div className="max-w-4xl space-y-8">
-      {/* ================= HEADER ================= */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-    {/* Backdrop */}
-    <div
-      className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-      onClick={onClose}
-    />
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onClose}
+      />
 
-    {/* Modal */}
-    <div className="relative z-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-8 shadow-xl">
-      {/* EXISTING CONTENT BELOW */}
-      <div className="space-y-8">
-        {/* HEADER */}
-        <div className="flex items-center justify-between">
+      <div className="relative z-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-8 shadow-xl">
+        <h2 className="text-2xl font-semibold">Create Question</h2>
+
+        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+
+          {/* TITLE (OPTIONAL) */}
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Create Question
-            </h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Add a new question to the question bank
-            </p>
-          </div>
-
-          {/* <button
-           
-            className="rounded-lg border px-4 py-2 text-sm"
-          >
-            Close
-          </button> */}
-        </div>
-
-      {/* ================= FORM ================= */}
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-8 rounded-2xl border border-gray-200 bg-white p-8 shadow-sm"
-      >
-        {/* -------- BASIC INFO -------- */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Title
-            </label>
+            <label className="text-sm font-medium">Title (optional)</label>
             <input
               name="title"
               value={form.title}
               onChange={handleChange}
-              required
-              className="mt-1 w-full rounded-lg border px-4 py-2 focus:border-purple-500 focus:outline-none"
+              className="w-full rounded-lg border px-4 py-2"
             />
           </div>
 
+          {/* DESCRIPTION */}
           <div>
-            <label className="text-sm font-medium text-gray-700">
-              Difficulty
-            </label>
-            <select
-              name="difficulty"
-              value={form.difficulty}
-              onChange={handleChange}
-              className="mt-1 w-full rounded-lg border px-4 py-2"
-            >
-              {DIFFICULTY_OPTIONS.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Category
-            </label>
-            <select
-              name="category"
-              value={form.category}
-              onChange={handleChange}
-              className="mt-1 w-full rounded-lg border px-4 py-2"
-            >
-              {CATEGORY_OPTIONS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Question Type
-            </label>
-            <select
-              name="questionType"
-              value={form.questionType}
-              onChange={handleChange}
-              className="mt-1 w-full rounded-lg border px-4 py-2"
-            >
-              <option value="CODING">CODING</option>
-              <option value="MCQ">MCQ</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label className="text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            rows={4}
-            className="mt-1 w-full rounded-lg border px-4 py-2"
-          />
-        </div>
-
-        <div>
-          <label className="text-sm font-medium text-gray-700">
-            Tags (comma separated)
-          </label>
-          <input
-            name="tags"
-            value={form.tags}
-            onChange={handleChange}
-            className="mt-1 w-full rounded-lg border px-4 py-2"
-          />
-        </div>
-
-        {/* -------- CODING FIELDS -------- */}
-        {isCoding && (
-        <div className="space-y-6">
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Constraints
-            </label>
+            <label className="text-sm font-medium">Question</label>
             <textarea
-              name="constraints"
-              value={form.constraints}
+              name="description"
+              value={form.description}
               onChange={handleChange}
-              rows={3}
-              className="mt-1 w-full rounded-lg border px-4 py-2"
+              rows={8}
+              required
+              className="w-full rounded-lg border px-4 py-2"
             />
           </div>
 
-          <TestCasesSection
-            testCases={form.testCases}
-            onChange={handleTestCaseChange}
-            onAdd={addTestCase}
-            onRemove={removeTestCase}
-          />
-        </div>
-      )}
+          {/* CONSTRAINTS */}
+          {isCoding && (
+            <div>
+              <label className="text-sm font-medium">
+                Constraints (one per line)
+              </label>
+              <textarea
+                name="constraints"
+                value={form.constraints}
+                onChange={handleChange}
+                rows={3}
+                className="w-full rounded-lg border px-4 py-2"
+              />
+            </div>
+          )}
 
+          {/* TEST CASES */}
+          {isCoding && (
+            <TestCasesSection
+              testCases={form.testCases}
+              onChange={handleTestCaseChange}
+              onAdd={addTestCase}
+              onRemove={removeTestCase}
+            />
+          )}
 
-        {/* -------- MCQ FIELDS -------- */}
-        {isMCQ && (
-        <div className="space-y-6">
+          {/* MCQ */}
+          {isMCQ && (
             <div className="space-y-4">
-            <p className="text-sm font-medium text-gray-700">
-                Options
-            </p>
+              <p className="text-sm font-medium">Options</p>
 
-            {form.options.map((opt, idx) => (
-                <div
-                key={idx}
-                className="flex items-center gap-3"
-                >
-                <input
+              {form.options.map((opt, idx) => (
+                <div key={idx} className="flex items-center gap-3">
+                  <input
                     type="radio"
                     name="correctOption"
                     checked={form.correctAnswerIndex === idx}
                     onChange={() =>
-                    setForm((prev) => ({
-                        ...prev,
+                      setForm((p) => ({
+                        ...p,
                         correctAnswerIndex: idx,
-                    }))
+                      }))
                     }
-                    className="accent-purple-500"
-                />
-
-                <input
+                  />
+                  <input
                     value={opt}
                     onChange={(e) =>
-                    handleOptionChange(idx, e.target.value)
+                      handleOptionChange(idx, e.target.value)
                     }
-                    placeholder={`Option ${idx + 1}`}
-                    className="flex-1 rounded-lg border px-4 py-2 focus:border-purple-500 focus:outline-none"
-                />
+                    className="flex-1 rounded-lg border px-4 py-2"
+                  />
                 </div>
-            ))}
-
-            <p className="text-xs text-gray-500">
-                Select the correct option using the radio button
-            </p>
+              ))}
             </div>
-        </div>
-        )}
+          )}
 
+          <div className="flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border px-6 py-2"
+            >
+              Cancel
+            </button>
 
-        {/* -------- ACTIONS -------- */}
-        <div className="flex justify-end gap-4 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border px-6 py-2 text-sm"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded-lg bg-purple-500 px-6 py-2 text-sm font-medium text-white hover:bg-purple-600 disabled:opacity-50"
-          >
-            {submitting ? "Creating..." : "Create Question"}
-          </button>
-        </div>
-      </form>
-    </div>
-    </div>
-    </div>
+            <button
+              disabled={submitting}
+              className="rounded-lg bg-purple-600 px-6 py-2 text-white"
+            >
+              {submitting ? "Creating..." : "Create Question"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

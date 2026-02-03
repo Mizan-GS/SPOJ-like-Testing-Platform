@@ -48,6 +48,15 @@ select:-webkit-autofill {
   --color-border: #EEEEEE;
 }
 
+:root {
+  --color-surface: rgba(255, 255, 255, 0.85);
+}
+
+.dark {
+  --color-surface: rgba(255, 255, 255, 0.08);
+}
+
+
 /* =========================
    TAILWIND THEME BRIDGE (V4)
 ========================= */

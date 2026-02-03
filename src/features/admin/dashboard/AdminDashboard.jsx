@@ -25,9 +25,15 @@ import QuestionsByDifficultyChart from "./charts/QuestionsByDifficultyChart";
 import QuestionsAnalyticsTabs from "./charts/QuestionAnalyticsTabs";
 import TopTestsChart from "./charts/TopTestsChart";
 import { useTheme } from "../../../app/providers/ThemeProvider";
-
+import TestAttemptsModal from "./modals/TestAttemptsModal";
+import AssessmentAttemptsModal from "./modals/AssessmentAttemptsModal";
+import LanguageUsageChart from "./charts/LanguageUsageChart";
+import { getLanguageAnalytics } from "../../../services/admin.api";
+import TestLeaderboardModal from "./modals/TestLeaderboardModal";
+import LeaderboardTable from "./components/LeaderboardTable";
+import { getTestAttemptsByTestId } from "../../../services/admin.api";
 // import { useEffect, useState } from "react";
-
+// import TestAttemptsModal from "./modals/TestAttemptsModal";
 function useResolvedTheme() {
   const [resolvedTheme, setResolvedTheme] = useState(
     document.documentElement.classList.contains("dark")
@@ -110,6 +116,14 @@ function AdminDashboard() {
   const [testAnalytics, setTestAnalytics] = useState([]);
   const theme=useTheme()
   const resolvedTheme = useResolvedTheme();
+  const [showTestAttemptsModal, setShowTestAttemptsModal] = useState(false);
+  const [showAssessmentAttemptsModal, setShowAssessmentAttemptsModal] = useState(false);
+  const [languageUsage, setLanguageUsage] = useState([]);
+  // const [showTestAttemptsModal, setShowTestAttemptsModal] = useState(false);
+  const [leaderboardTests, setLeaderboardTests] = useState([]);
+  const [selectedLeaderboardTest, setSelectedLeaderboardTest] = useState("");
+  const [leaderboardData, setLeaderboardData] = useState([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
   const categoryChartData=React.useMemo(()=>{
     const map={};
@@ -191,15 +205,19 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [overviewRes, testRes, userRes] = await Promise.all([
+        const [overviewRes, testRes, userRes,languageRes] = await Promise.all([
           getAdminOverviewAnalytics(),
           getTestAnalytics(),
           getUserAnalytics(),
-
+          getLanguageAnalytics()
         ]);
+
+        const testsRes = await getTestAnalytics();
+        setLeaderboardTests(testsRes.data.data || []);
+
         const questionsRes = await getAllQuestions();
         setQuestions(questionsRes.data.data.questions || []);
-
+        setLanguageUsage(languageRes.data.data)
         console.log(overviewRes.data.data);
         console.log(userRes.data.data);
         console.log(testRes.data.data);
@@ -220,6 +238,47 @@ function AdminDashboard() {
 
     fetchDashboardData();
   }, []);
+
+  useEffect(() => {
+    if (!selectedLeaderboardTest) return;
+
+    const fetchLeaderboard = async () => {
+      try {
+        setLeaderboardLoading(true);
+
+        const res = await getTestAttemptsByTestId(
+          selectedLeaderboardTest
+        );
+
+        const processed = res.data.data.map((a) => {
+          const duration =
+            new Date(a.endTime) - new Date(a.startTime);
+
+          return {
+            userName: a.user.userName,
+            email: a.user.email,
+            score: a.score,
+            duration, // tie-breaker
+          };
+        });
+
+        // score DESC, duration ASC
+        processed.sort(
+          (a, b) =>
+            b.score - a.score || a.duration - b.duration
+        );
+
+        setLeaderboardData(processed);
+      } catch (e) {
+        toast.error("Failed to load leaderboard");
+      } finally {
+        setLeaderboardLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, [selectedLeaderboardTest]);
+
 
   if (loading) {
     return <div className="text-[var(--color-text)]">Loading dashboard...</div>;
@@ -281,21 +340,22 @@ function AdminDashboard() {
             color="green"
           />
           <OverviewCard
-            icon={BadgePercent}
-            label="Total Assessments Attempts"
-            // onClick={() => setShowAssessmentsModal(true)}
-            value={overview.assessmentAttempts}
-            description="Attempts on assessments"
-            color="yellow"
-          />
-          <OverviewCard
             icon={SquareEqual}
             label="Total Tests Attempts"
-            // onClick={() => setShowAssessmentsModal(true)}
+            onClick={() => setShowTestAttemptsModal(true)}
             value={overview.testAttempts}
             description="Attempts on tests"
             color="gray"
           />
+          <OverviewCard
+            icon={BadgePercent}
+            label="Total Assessments Attempts"
+            onClick={() => setShowAssessmentAttemptsModal(true)}
+            value={overview.assessmentAttempts}
+            description="Attempts on assessments"
+            color="yellow"
+          />
+          
          
         </div>
       </section>
@@ -317,7 +377,47 @@ function AdminDashboard() {
       />
         
 
-        <TopTestsChart data={top5Tests}/>
+        <TopTestsChart
+        key={`questions-tab-${resolvedTheme}`} 
+        data={top5Tests}/>
+
+        <LanguageUsageChart
+        key={`language-usage-${resolvedTheme}`}
+        data={languageUsage}/>
+
+        <section className="space-y-4 rounded-xl border border-border bg-bg p-6">
+          <h2 className="text-lg font-semibold text-text">
+            Weekly Test Leaderboard
+          </h2>
+
+          {/* Test dropdown */}
+          <select
+            value={selectedLeaderboardTest}
+            onChange={(e) =>
+              setSelectedLeaderboardTest(e.target.value)
+            }
+            className="w-full rounded-lg border border-border bg-bg px-4 py-2 text-text"
+          >
+            <option value="">Select a test</option>
+            {leaderboardTests.map((t) => (
+              <option key={t.testId} value={t.testId}>
+                {t.title}
+              </option>
+            ))}
+          </select>
+
+          {/* Content */}
+          {leaderboardLoading && (
+            <p className="text-text/60">Loading leaderboard…</p>
+          )}
+
+          {!leaderboardLoading &&
+            leaderboardData.length > 0 && (
+              <LeaderboardTable data={leaderboardData} />
+            )}
+        </section>
+
+
       </section>
 
 
@@ -338,6 +438,23 @@ function AdminDashboard() {
         />
       )}
 
+      {showTestAttemptsModal && (
+        <TestAttemptsModal
+          onClose={() => setShowTestAttemptsModal(false)}
+        />
+      )}
+
+      {showAssessmentAttemptsModal && (
+        <AssessmentAttemptsModal
+          onClose={() => setShowAssessmentAttemptsModal(false)}
+        />
+      )}
+
+      {showTestAttemptsModal && (
+        <TestAttemptsModal
+          onClose={() => setShowTestAttemptsModal(false)}
+        />
+      )}
 
 
 

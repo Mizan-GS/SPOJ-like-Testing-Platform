@@ -99,10 +99,16 @@ function EditQuestionModal({
      payload.testCases = form.testCases
       .filter(tc => tc.input && tc.output)
       .map(tc => ({
-        input: tc.input,
+        input: Array.isArray(tc.input)
+          ? tc.input
+          : tc.input
+              .split("\n")
+              .map(line => line.trim())
+              .filter(Boolean),
         output: tc.output,
         explanation: tc.explanation || "",
       }));
+
 
     }
 
@@ -146,44 +152,68 @@ function EditQuestionModal({
           className="mt-6 space-y-6"
         >
           {/* Title */}
-          <input
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            disabled={isViewMode}
-            className={`w-full rounded-lg border px-4 py-2 ${
+          <div>
+            <label className="text-sm font-medium text-gray-700">
+              Title
+            </label>
+            <input
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              disabled={isViewMode}
+              className={`mt-1 w-full rounded-lg border px-4 py-2 ${
                 isViewMode ? "bg-gray-100 cursor-not-allowed" : ""
-            }`}
+              }`}
             />
+          </div>
+
 
         
 
 
           {/* Locked fields */}
           <div className="grid grid-cols-2 gap-4">
-            <input
-              value={form.category}
-              disabled
-              className="rounded-lg border bg-gray-100 px-4 py-2"
-            />
-            <input
-              value={form.questionType}
-              disabled
-              className="rounded-lg border bg-gray-100 px-4 py-2"
-            />
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Category
+              </label>
+              <input
+                value={form.category}
+                disabled
+                className="mt-1 rounded-lg border bg-gray-100 px-4 py-2 w-full"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Question Type
+              </label>
+              <input
+                value={form.questionType}
+                disabled
+                className="mt-1 rounded-lg border bg-gray-100 px-4 py-2 w-full"
+              />
+            </div>
           </div>
 
+
           {/* Description */}
-             <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            disabled={isViewMode}
-            rows={4}
-            className={`w-full rounded-lg border px-4 py-2 ${
-                isViewMode ? "bg-gray-100 cursor-not-allowed" : ""
-            }`}
-            />
+             <div>
+              <label className="text-sm font-medium text-gray-700">
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                disabled={isViewMode}
+                rows={10}
+                className={`mt-1 w-full rounded-lg border px-4 py-2 ${
+                  isViewMode ? "bg-gray-100 cursor-not-allowed" : ""
+                }`}
+              />
+            </div>
+
           {isCoding && (
           <div className="space-y-6">
             <div>

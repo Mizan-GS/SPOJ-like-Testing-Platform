@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import { loginaction } from "../services/auth.api";
 import bg from "../../assets/images/photo_2026-01-22_13-42-38.jpg";
+import { Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -173,7 +174,7 @@ e
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-1 top-1/2 -translate-y-1/2 text-purple-300"
                 >
-                  {showPassword ? "🙈" : "👁"}
+                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </fieldset>

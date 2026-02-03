@@ -197,6 +197,23 @@ console.log("EDIT ID:", assessmentId);
               className="mt-1 w-full rounded-lg border px-4 py-2"
             />
           </div>
+          <div className="space-y-1">
+        <label className="text-sm font-medium text-gray-700">
+          Duration (minutes)
+        </label>
+        <input
+          type="number"
+          min={1}
+          value={activeSection.duration}
+          onChange={(e) =>
+            setActiveSection((p) => ({
+              ...p,
+              duration: Number(e.target.value),
+            }))
+          }
+          className="w-full rounded-lg border px-3 py-2 focus:border-purple-500 focus:outline-none"
+        />
+      </div>
         </div>
 
         {/* ===== SECTIONS ===== */}
@@ -296,7 +313,7 @@ console.log("EDIT ID:", assessmentId);
       </div>
 
       {/* Duration */}
-      <div className="space-y-1">
+      {/* <div className="space-y-1">
         <label className="text-sm font-medium text-gray-700">
           Duration (minutes)
         </label>
@@ -312,7 +329,7 @@ console.log("EDIT ID:", assessmentId);
           }
           className="w-full rounded-lg border px-3 py-2 focus:border-purple-500 focus:outline-none"
         />
-      </div>
+      </div> */}
     </div>
 
     {/* ADD SECTION BUTTON */}

@@ -50,6 +50,10 @@ export const getDeletedTests = (params = {}) =>
 export const restoreTest = (id) =>
   axiosClient.patch(`/tests/admin/${id}/restore`);
 
+export const getTestAttemptsByTestId = (testId) =>
+  axiosClient.get(`/analytics/admin/test-attempts/${testId}`);
+
+
 //* ANALYTICS (ADMIN)
 
 export const getAdminOverviewAnalytics = () =>
@@ -85,7 +89,18 @@ export const restoreAssessment = (id) =>
 export const getAssessmentQuestionHealth = (id) =>
   axiosClient.get(`/assessments/admin/${id}/question-health`);
 
+export const getAssessmentAnalytics = () =>
+  axiosClient.get(`/analytics/admin/assessment`);
+
+export const getAssessmentAttemptsByUser = (userId) =>
+  axiosClient.get(`/analytics/admin/assessment/${userId}`);
+
 
 
 
 // export const getUserTestAttempts = ()=>
+
+
+
+  export const getLanguageAnalytics = () =>
+  axiosClient.get("/analytics/admin/language");
