@@ -38,7 +38,7 @@ function LanguageUsageBarChart({ data }) {
         layout: root.verticalLayout,
       })
     );
-
+    
     // 4️⃣ X Axis (Languages)
     const xAxis = chart.xAxes.push(
       am5xy.CategoryAxis.new(root, {
@@ -97,6 +97,8 @@ chart.set(
     behavior: "none",
   })
 );
+
+
 
 
 

@@ -239,6 +239,9 @@ function AdminDashboard() {
     fetchDashboardData();
   }, []);
 
+
+  
+
   useEffect(() => {
     if (!selectedLeaderboardTest) return;
 
@@ -278,6 +281,10 @@ function AdminDashboard() {
 
     fetchLeaderboard();
   }, [selectedLeaderboardTest]);
+
+  // useEffect(()=>{
+  //   fetchLeaderboard()
+  // },[])
 
 
   if (loading) {
@@ -370,21 +377,6 @@ function AdminDashboard() {
     ">
         {/* <QuestionsByCategoryChart data={categoryChartData}/>
         <QuestionsByDifficultyChart data={difficultyChartData}/> */}
-        <QuestionsAnalyticsTabs
-         key={`questions-tabs-${resolvedTheme}`}
-        categoryData={categoryChartData}
-        difficultyData={difficultyChartData}
-      />
-        
-
-        <TopTestsChart
-        key={`questions-tab-${resolvedTheme}`} 
-        data={top5Tests}/>
-
-        <LanguageUsageChart
-        key={`language-usage-${resolvedTheme}`}
-        data={languageUsage}/>
-
         <section className="space-y-4 rounded-xl border border-border bg-bg p-6">
           <h2 className="text-lg font-semibold text-text">
             Weekly Test Leaderboard
@@ -416,6 +408,21 @@ function AdminDashboard() {
               <LeaderboardTable data={leaderboardData} />
             )}
         </section>
+        
+
+        <TopTestsChart
+        key={`questions-tab-${resolvedTheme}`} 
+        data={top5Tests}/>
+
+        <LanguageUsageChart
+        key={`language-usage-${resolvedTheme}`}
+        data={languageUsage}/>
+
+        <QuestionsAnalyticsTabs
+         key={`questions-tabs-${resolvedTheme}`}
+        categoryData={categoryChartData}
+        difficultyData={difficultyChartData}
+      />
 
 
       </section>

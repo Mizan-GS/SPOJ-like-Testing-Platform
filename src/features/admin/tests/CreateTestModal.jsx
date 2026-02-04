@@ -189,7 +189,7 @@ function CreateTestModal({ onClose, onConfirm }) {
               Select Questions
             </label>
 
-            <div className="max-h-64 overflow-y-auto rounded-lg border">
+            <div className="max-h-80 overflow-y-auto rounded-lg border">
               {loadingQuestions ? (
                 <p className="p-4 text-gray-500">
                   Loading...

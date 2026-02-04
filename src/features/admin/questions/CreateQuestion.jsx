@@ -31,7 +31,21 @@ function CreateQuestion({ onClose, onSuccess }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+    // 🚫 If category is NOT CODING, force questionType to MCQ
+    if (name === "category" && value !== "CODING") {
+      return {
+        ...prev,
+        category: value,
+        questionType: "MCQ",
+      };
+    }
+
+    return {
+      ...prev,
+      [name]: value,
+    };
+  });
   };
 
   const handleOptionChange = (index, value) => {
@@ -88,7 +102,7 @@ function CreateQuestion({ onClose, onSuccess }) {
       description: form.description,
       difficulty: form.difficulty,
       tags: form.tags
-        .split(",")
+        .split("\n")
         .map((t) => t.trim())
         .filter(Boolean),
     };
@@ -96,7 +110,7 @@ function CreateQuestion({ onClose, onSuccess }) {
     // ✅ CODING
     if (isCoding) {
       payload.constraints = form.constraints
-        ? form.constraints.split(" ").filter(Boolean) // 🔹 string → array
+        ? form.constraints.split("\n").filter(Boolean) // 🔹 string → array
         : [];
 
       payload.testCases = form.testCases
@@ -169,6 +183,64 @@ function CreateQuestion({ onClose, onSuccess }) {
               className="w-full rounded-lg border px-4 py-2"
             />
           </div>
+
+
+          <div className="grid grid-cols-3 gap-4">
+            {/* Category */}
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Category
+              </label>
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                className="mt-1 w-full rounded-lg border px-4 py-2"
+              >
+                {CATEGORY_OPTIONS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Question Type */}
+            <div className="">
+              <label className="text-sm font-medium text-gray-700">
+                Question Type
+              </label>
+              <select
+                name="questionType"
+                value={form.questionType}
+                onChange={handleChange}
+                className="mt-1 w-full rounded-lg border px-4 py-2"
+              >
+                <option value="CODING" disabled={form.category !== "CODING"}>CODING</option>
+                <option value="MCQ">MCQ</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Difficulty
+              </label>
+              <select
+                name="difficulty"
+                value={form.difficulty}
+                onChange={handleChange}
+                className="mt-1 w-full rounded-lg border px-4 py-2"
+              >
+                {DIFFICULTY_OPTIONS.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+          </div>
+
 
           {/* CONSTRAINTS */}
           {isCoding && (

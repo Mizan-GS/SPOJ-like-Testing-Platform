@@ -214,10 +214,10 @@ function EditTestModal({ testId, onClose, onUpdated }) {
           {/* QUESTIONS */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
-              Questions (selected shown first)
+              Questions 
             </label>
 
-            <div className="max-h-64 overflow-y-auto rounded-lg border">
+            <div className="max-h-80 overflow-y-auto rounded-lg border">
               {questions.map((q) => {
                 const checked =
                   selectedIds.includes(q._id);
